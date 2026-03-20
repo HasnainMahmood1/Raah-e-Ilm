@@ -1,0 +1,2457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Raah-e-Ilm – Your Path Among the Stars</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  --bg:#03000f;
+  --bg2:#06001a;
+  --accent:#00e5ff;
+  --accent2:#b400ff;
+  --accent3:#ff6b35;
+  --glow:rgba(0,229,255,0.7);
+  --glow2:rgba(180,0,255,0.7);
+  --text:#dff6ff;
+  --text2:#8ab8cc;
+  --card:rgba(255,255,255,0.04);
+  --border:rgba(0,229,255,0.18);
+  --sidebar-w:300px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── CANVAS BG ── */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── AUTH OVERLAY ── */
+#authOverlay{
+  position:fixed;inset:0;z-index:9999;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(3,0,15,0.85);backdrop-filter:blur(12px);
+}
+.auth-box{
+  background:linear-gradient(145deg,rgba(6,0,26,0.95),rgba(3,0,15,0.98));
+  border:1px solid rgba(0,229,255,0.3);
+  border-radius:24px;
+  padding:3rem 2.5rem;
+  width:420px;
+  max-width:95vw;
+  box-shadow:0 0 60px rgba(0,229,255,0.12),0 0 120px rgba(180,0,255,0.08);
+  animation:fadeUp .6s ease both;
+  text-align:center;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.auth-logo{
+  font-family:'Syne',sans-serif;
+  font-size:2rem;font-weight:800;
+  text-align:center;margin-bottom:0.3rem;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.auth-sub{text-align:center;color:var(--text2);font-size:.9rem;margin-bottom:2rem;}
+.auth-divider{
+  display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:rgba(255,255,255,.2);font-size:.8rem;
+}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(0,229,255,.15);}
+.google-btn{
+  width:100%;padding:1rem 1.5rem;border-radius:14px;
+  background:rgba(255,255,255,0.07);
+  border:1px solid rgba(255,255,255,0.18);
+  color:#fff;font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;
+  cursor:pointer;transition:all .3s ease;
+  display:flex;align-items:center;justify-content:center;gap:.8rem;
+  box-shadow:0 2px 20px rgba(0,0,0,.3);
+  margin-bottom:1rem;
+}
+.google-btn:hover{background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,.35);transform:translateY(-2px);box-shadow:0 6px 30px rgba(0,229,255,0.2);}
+.google-btn svg{width:22px;height:22px;flex-shrink:0;}
+.auth-note{font-size:.78rem;color:rgba(138,184,204,0.6);margin-top:1rem;line-height:1.5;}
+.auth-msg{text-align:center;font-size:.85rem;margin-top:.8rem;min-height:1.2rem;}
+.auth-msg.error{color:#ff4d6d;}
+.auth-msg.success{color:#00ff88;}
+
+/* ── APP SHELL ── */
+#app{display:block;position:relative;z-index:1;}
+
+/* ── HEADER ── */
+header{
+  position:fixed;top:0;left:0;right:0;height:70px;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem 0 calc(var(--sidebar-w) + 2rem);
+  background:rgba(3,0,15,0.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:padding .4s ease;
+}
+header.no-sidebar{padding-left:2rem;}
+.header-logo{
+  font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  cursor:pointer;
+}
+.header-right{display:flex;align-items:center;gap:1rem;}
+.user-chip{
+  display:flex;align-items:center;gap:.6rem;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:50px;padding:.4rem 1rem .4rem .5rem;
+  cursor:pointer;transition:all .3s;
+}
+.user-chip:hover{border-color:var(--accent);background:rgba(0,229,255,0.08);}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#03000f;
+}
+.menu-btn{
+  display:none;background:none;border:none;color:var(--accent);
+  font-size:1.5rem;cursor:pointer;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;left:0;top:70px;bottom:0;
+  width:var(--sidebar-w);z-index:150;
+  background:linear-gradient(180deg,rgba(6,0,22,0.97),rgba(3,0,12,0.97));
+  backdrop-filter:blur(20px);
+  border-right:1px solid var(--border);
+  overflow-y:auto;overflow-x:hidden;
+  transform:translateX(0);
+  transition:transform .4s cubic-bezier(.25,.8,.25,1);
+  scrollbar-width:thin;scrollbar-color:rgba(0,229,255,0.2) transparent;
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.2);border-radius:3px;}
+.sidebar.hidden{transform:translateX(-100%);}
+
+/* Nav items */
+.nav-section{padding:.5rem 0;}
+.nav-label{
+  padding:.4rem 1.5rem;
+  font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;
+  letter-spacing:2px;color:rgba(0,229,255,0.4);text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.75rem 1.5rem;cursor:pointer;
+  font-size:.95rem;color:var(--text2);
+  transition:all .3s ease;position:relative;
+  border-left:3px solid transparent;
+}
+.nav-item:hover{color:var(--accent);background:rgba(0,229,255,0.06);border-left-color:rgba(0,229,255,0.3);}
+.nav-item.active{color:var(--accent);background:rgba(0,229,255,0.1);border-left-color:var(--accent);}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;}
+
+/* Curriculum tree */
+.curr-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.5rem;cursor:pointer;
+  font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;
+  color:var(--text2);transition:all .3s;
+  border-left:3px solid transparent;
+}
+.curr-header:hover{color:var(--accent);background:rgba(0,229,255,0.06);border-left-color:rgba(0,229,255,0.3);}
+.curr-header.open{color:var(--accent);border-left-color:var(--accent);}
+.curr-toggle{
+  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  border-radius:4px;background:rgba(0,229,255,0.1);
+  font-size:.9rem;transition:transform .3s ease;color:var(--accent);flex-shrink:0;
+}
+.curr-header.open .curr-toggle{transform:rotate(45deg);}
+.curr-subjects{
+  max-height:0;overflow:hidden;
+  transition:max-height .5s cubic-bezier(.4,0,.2,1),opacity .4s ease;
+  opacity:0;
+}
+.curr-subjects.open{max-height:2000px;opacity:1;}
+.sub-item{
+  padding:.55rem 1.5rem .55rem 3rem;
+  font-size:.88rem;color:var(--text2);cursor:pointer;
+  transition:all .3s ease;position:relative;
+}
+.sub-item:hover{color:var(--accent2);background:rgba(180,0,255,0.06);padding-left:3.3rem;}
+.sub-item.active{
+  color:var(--accent2);
+  background:linear-gradient(to right,rgba(180,0,255,0.15),transparent);
+}
+.sub-item.active::before{
+  content:'';position:absolute;left:1.8rem;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--accent2);
+  box-shadow:0 0 10px var(--accent2);
+  animation:dotPulse 2s infinite;
+}
+@keyframes dotPulse{0%,100%{transform:translateY(-50%) scale(1);}50%{transform:translateY(-50%) scale(1.5);}}
+
+/* SL/HL nested */
+.sub-group-header{
+  padding:.55rem 1.5rem .55rem 3rem;
+  font-size:.88rem;color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .3s;
+}
+.sub-group-header:hover{color:var(--accent);}
+.sub-group-header.open{color:var(--accent);}
+.sub-group-items{max-height:0;overflow:hidden;transition:max-height .3s ease,opacity .3s;opacity:0;}
+.sub-group-items.open{max-height:300px;opacity:1;}
+.sub-sub-item{
+  padding:.5rem 1.5rem .5rem 4.5rem;
+  font-size:.83rem;color:var(--text2);cursor:pointer;transition:all .3s;
+}
+.sub-sub-item:hover{color:var(--accent2);padding-left:4.8rem;}
+.sub-sub-item.active{color:var(--accent2);}
+
+/* Curriculum subpages: Notes / PastPapers / Flashcards */
+.curr-subpage{
+  padding:.55rem 1.5rem .55rem 2.5rem;
+  font-size:.85rem;color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  border-left:2px solid transparent;
+  transition:all .3s;
+  font-family:'Syne',sans-serif;font-weight:600;
+}
+.curr-subpage:hover{color:var(--accent);background:rgba(0,229,255,0.05);border-left-color:rgba(0,229,255,0.2);}
+.curr-subpage.open{color:var(--accent);border-left-color:rgba(0,229,255,0.4);}
+.curr-subpage-toggle{font-size:.7rem;color:var(--accent);transition:transform .3s;}
+.curr-subpage.open .curr-subpage-toggle{transform:rotate(90deg);}
+.curr-subpage-subjects{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1),opacity .4s;opacity:0;}
+.curr-subpage-subjects.open{max-height:1200px;opacity:1;}
+.curr-subpage-item{
+  padding:.45rem 1.5rem .45rem 3.8rem;
+  font-size:.82rem;color:var(--text2);cursor:pointer;transition:all .3s;
+}
+.curr-subpage-item:hover{color:var(--accent2);background:rgba(180,0,255,0.06);}
+.curr-subpage-item.active{color:var(--accent2);background:rgba(180,0,255,0.1);}
+
+/* ── MAIN ── */
+#main{
+  margin-left:var(--sidebar-w);margin-top:70px;
+  min-height:calc(100vh - 70px);
+  transition:margin-left .4s ease;
+  padding:2.5rem;
+}
+#main.full{margin-left:0;}
+
+/* ── PAGES ── */
+.page{display:none;animation:pageIn .5s ease both;}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── HOME PAGE ── */
+.home-hero{
+  text-align:center;padding:3rem 0 2rem;
+}
+.home-title{
+  font-family:'Syne',sans-serif;font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;
+  background:linear-gradient(135deg,var(--accent) 30%,var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1.2;margin-bottom:1rem;
+}
+.home-sub{color:var(--text2);font-size:1.05rem;max-width:600px;margin:0 auto 2.5rem;}
+.home-stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1rem;max-width:700px;margin:0 auto 3rem;
+}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:1.5rem;text-align:center;
+  transition:all .4s ease;
+  animation:fadeUp .6s ease both;
+}
+.stat-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 10px 40px rgba(0,229,255,0.12);}
+.stat-num{
+  font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.stat-label{font-size:.8rem;color:var(--text2);margin-top:.3rem;}
+
+/* Quick Access */
+.section-title{
+  font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;
+  color:var(--accent);margin-bottom:1.2rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(0,229,255,0.3),transparent);}
+.subjects-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:1rem;margin-bottom:3rem;
+}
+.subj-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:1.2rem;cursor:pointer;transition:all .35s ease;
+  display:flex;flex-direction:column;gap:.5rem;
+  animation:fadeUp .5s ease both;
+}
+.subj-card:hover{
+  border-color:var(--accent2);transform:translateY(-4px);
+  background:rgba(180,0,255,0.08);
+  box-shadow:0 8px 30px rgba(180,0,255,0.15);
+}
+.subj-icon{font-size:1.8rem;margin-bottom:.3rem;}
+.subj-name{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:600;color:var(--text);}
+.subj-curr{font-size:.75rem;color:var(--text2);}
+.empty-subjects{
+  grid-column:1/-1;text-align:center;padding:3rem;
+  color:var(--text2);
+}
+.add-subjects-btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(180,0,255,0.15));
+  border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1.5rem;color:var(--accent);
+  font-family:'Syne',sans-serif;font-weight:600;
+  cursor:pointer;transition:all .3s;margin-top:1rem;
+}
+.add-subjects-btn:hover{border-color:var(--accent);box-shadow:0 0 20px rgba(0,229,255,0.2);}
+
+/* ── SUBJECT PAGE ── */
+.subj-page-hero{
+  position:relative;border-radius:20px;overflow:hidden;
+  margin-bottom:2rem;height:240px;
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  transition:background-image .4s ease;
+}
+.subj-page-hero img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  filter:brightness(.55) saturate(1.3);
+  transition:transform .6s ease, opacity .5s ease;
+  opacity:0;
+}
+.subj-page-hero img.loaded{opacity:1;}
+.subj-page-hero:hover img{transform:scale(1.05);}
+.subj-page-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:2rem;
+}
+.subj-page-title{
+  font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+  color:#fff;text-shadow:0 0 30px rgba(0,229,255,0.5);
+}
+.subj-page-badge{
+  display:inline-block;background:rgba(0,229,255,0.2);
+  border:1px solid var(--accent);border-radius:20px;
+  padding:.3rem .8rem;font-size:.75rem;color:var(--accent);
+  margin-top:.5rem;
+}
+
+/* Tabs inside subject page */
+.page-tabs{
+  display:flex;gap:.5rem;margin-bottom:2rem;
+  border-bottom:1px solid var(--border);padding-bottom:0;
+  overflow-x:auto;
+}
+.page-tab{
+  padding:.7rem 1.2rem;font-family:'Syne',sans-serif;font-weight:600;
+  font-size:.88rem;color:var(--text2);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all .3s;white-space:nowrap;
+}
+.page-tab:hover{color:var(--accent);}
+.page-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+.tab-panel{display:none;animation:fadeUp .4s ease both;}
+.tab-panel.active{display:block;}
+
+/* Resource cards */
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;}
+.resource-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:1.5rem;transition:all .35s ease;
+  cursor:pointer;
+}
+.resource-card:hover{
+  border-color:var(--accent);transform:translateY(-3px);
+  box-shadow:0 8px 30px rgba(0,229,255,0.1);
+}
+.rc-icon{font-size:2rem;margin-bottom:.8rem;}
+.rc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.4rem;}
+.rc-desc{font-size:.82rem;color:var(--text2);line-height:1.5;}
+.rc-tag{
+  display:inline-block;margin-top:.8rem;
+  background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);
+  border-radius:20px;padding:.25rem .7rem;font-size:.72rem;color:var(--accent);
+}
+.rc-btn{
+  display:inline-flex;align-items:center;gap:.5rem;margin-top:1rem;
+  background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(180,0,255,0.1));
+  border:1px solid var(--border);border-radius:10px;
+  padding:.5rem 1rem;color:var(--accent);font-size:.82rem;
+  font-family:'Syne',sans-serif;font-weight:600;
+  cursor:pointer;transition:all .3s;text-decoration:none;
+}
+.rc-btn:hover{border-color:var(--accent);background:rgba(0,229,255,0.2);}
+
+/* Flashcards */
+.flashcard-container{perspective:1200px;margin:0 auto 2rem;max-width:600px;}
+.flashcard{
+  width:100%;height:280px;position:relative;
+  transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,0,.2,1);
+  cursor:pointer;
+}
+.flashcard.flipped{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute;inset:0;
+  border-radius:20px;padding:2.5rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;backface-visibility:hidden;
+  border:1px solid var(--border);
+}
+.flashcard-front{background:linear-gradient(135deg,rgba(0,229,255,0.1),rgba(180,0,255,0.08));}
+.flashcard-back{background:linear-gradient(135deg,rgba(180,0,255,0.12),rgba(0,229,255,0.08));transform:rotateY(180deg);}
+.fc-q{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);}
+.fc-a{font-size:.95rem;color:var(--text);line-height:1.6;}
+.fc-hint{font-size:.75rem;color:var(--text2);margin-top:1rem;}
+.fc-controls{display:flex;justify-content:center;gap:1rem;margin-bottom:2rem;}
+.fc-btn{
+  padding:.7rem 1.5rem;border-radius:12px;border:none;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+  cursor:pointer;transition:all .3s;
+}
+.fc-btn.prev{background:rgba(255,255,255,0.08);color:var(--text);}
+.fc-btn.next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#03000f;}
+.fc-btn:hover{transform:scale(1.05);}
+.fc-progress{text-align:center;color:var(--text2);font-size:.85rem;margin-bottom:1rem;}
+
+/* ── NOTES PAGE ── */
+.notes-search{
+  display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;
+}
+.search-input{
+  flex:1;min-width:200px;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.9rem 1.2rem;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:.95rem;outline:none;transition:all .3s;
+}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 20px rgba(0,229,255,0.1);}
+.search-input::placeholder{color:var(--text2);}
+.filter-select{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.9rem 1.2rem;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:.95rem;outline:none;cursor:pointer;
+}
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;}
+.note-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;transition:all .35s ease;cursor:pointer;
+}
+.note-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 10px 40px rgba(0,229,255,0.1);}
+.note-thumb{
+  height:130px;background:linear-gradient(135deg,rgba(0,229,255,0.1),rgba(180,0,255,0.1));
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  border-bottom:1px solid var(--border);
+}
+.note-body{padding:1.2rem;}
+.note-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.4rem;}
+.note-meta{display:flex;gap:.5rem;flex-wrap:wrap;}
+.note-badge{
+  font-size:.7rem;padding:.2rem .6rem;border-radius:20px;
+  background:rgba(0,229,255,0.1);color:var(--accent);border:1px solid rgba(0,229,255,0.2);
+}
+
+/* ── PAST PAPERS ── */
+.pp-filters{display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:2rem;}
+.pp-filter{
+  padding:.5rem 1.2rem;border-radius:20px;
+  border:1px solid var(--border);background:var(--card);
+  color:var(--text2);font-size:.85rem;cursor:pointer;transition:all .3s;
+}
+.pp-filter:hover,.pp-filter.active{
+  border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.1);
+}
+.pp-list{display:flex;flex-direction:column;gap:.8rem;}
+.pp-item{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  transition:all .3s;cursor:pointer;
+}
+.pp-item:hover{border-color:var(--accent);background:rgba(0,229,255,0.05);}
+.pp-info{display:flex;flex-direction:column;gap:.3rem;}
+.pp-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+.pp-detail{font-size:.8rem;color:var(--text2);}
+.pp-actions{display:flex;gap:.6rem;}
+
+/* ── PERSONAL PAGE ── */
+.personal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+@media(max-width:768px){.personal-grid{grid-template-columns:1fr;}}
+.personal-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:1.5rem;
+}
+.personal-card h3{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+  color:var(--accent);margin-bottom:1rem;
+}
+.chart-wrap{position:relative;height:220px;}
+.study-subjects-list{display:flex;flex-direction:column;gap:.7rem;}
+.ss-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem .8rem;background:rgba(255,255,255,0.03);border-radius:10px;
+}
+.ss-name{font-size:.88rem;}
+.ss-bar-wrap{width:120px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;}
+.ss-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .8s ease;}
+.ss-time{font-size:.78rem;color:var(--text2);min-width:50px;text-align:right;}
+
+/* Activity log */
+.activity-log{display:flex;flex-direction:column;gap:.6rem;max-height:300px;overflow-y:auto;}
+.al-item{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.6rem;background:rgba(255,255,255,0.02);border-radius:10px;
+  font-size:.82rem;
+}
+.al-icon{font-size:1.1rem;flex-shrink:0;}
+.al-text{flex:1;color:var(--text);}
+.al-time{color:var(--text2);font-size:.75rem;flex-shrink:0;}
+
+/* My subjects manager */
+.my-subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.8rem;}
+.my-subj-item{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem;text-align:center;font-size:.82rem;cursor:pointer;
+  transition:all .3s;position:relative;
+}
+.my-subj-item:hover{border-color:#ff4d6d;background:rgba(255,77,109,0.08);}
+.my-subj-item .remove-subj{
+  position:absolute;top:.4rem;right:.5rem;color:#ff4d6d;font-size:.75rem;
+  opacity:0;transition:opacity .2s;
+}
+.my-subj-item:hover .remove-subj{opacity:1;}
+
+/* ── SUPPORT PAGE ── */
+.support-hero{
+  text-align:center;padding:2rem 0 3rem;
+}
+.support-hero h1{
+  font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:1rem;
+}
+.support-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;margin-bottom:3rem;}
+.support-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:1.8rem;transition:all .35s;
+}
+.support-card:hover{border-color:var(--accent);transform:translateY(-3px);}
+.support-card h3{
+  font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+  color:var(--accent);margin-bottom:.8rem;
+}
+.support-card p,.support-card li{font-size:.88rem;color:var(--text2);line-height:1.7;}
+.support-card ul{padding-left:1.2rem;}
+.support-card li::marker{color:var(--accent);}
+.faq-item{
+  border-bottom:1px solid var(--border);padding:1rem 0;cursor:pointer;
+}
+.faq-q{
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem;
+}
+.faq-a{
+  max-height:0;overflow:hidden;font-size:.88rem;color:var(--text2);
+  line-height:1.6;transition:max-height .4s ease,opacity .3s;opacity:0;
+}
+.faq-item.open .faq-a{max-height:300px;opacity:1;padding-top:.8rem;}
+.faq-toggle{color:var(--accent);font-size:1.2rem;transition:transform .3s;}
+.faq-item.open .faq-toggle{transform:rotate(45deg);}
+
+/* ── ADD SUBJECTS MODAL ── */
+#addSubjModal{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;
+}
+#addSubjModal.open{display:flex;}
+.modal-box{
+  background:linear-gradient(145deg,rgba(6,0,26,0.98),rgba(3,0,15,.99));
+  border:1px solid var(--border);border-radius:24px;
+  width:600px;max-width:95vw;max-height:85vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 0 80px rgba(0,229,255,0.12);
+  animation:fadeUp .4s ease;
+}
+.modal-header{
+  padding:1.5rem 2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--accent);}
+.modal-close{background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer;}
+.modal-close:hover{color:var(--accent);}
+.modal-body{padding:1.5rem 2rem;overflow-y:auto;flex:1;}
+.modal-curr-section{margin-bottom:1.5rem;}
+.modal-curr-title{
+  font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;
+  letter-spacing:1px;color:var(--accent);margin-bottom:.8rem;
+}
+.modal-subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;}
+.modal-subj-btn{
+  padding:.55rem .8rem;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);
+  color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .25s;text-align:center;
+}
+.modal-subj-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.modal-subj-btn.selected{
+  border-color:var(--accent2);color:var(--accent2);
+  background:rgba(180,0,255,0.12);
+}
+.modal-footer{
+  padding:1rem 2rem;border-top:1px solid var(--border);
+  display:flex;gap:1rem;justify-content:flex-end;
+}
+
+/* ── TOASTS ── */
+#toast{
+  position:fixed;bottom:2rem;right:2rem;z-index:9000;
+  display:flex;flex-direction:column;gap:.5rem;pointer-events:none;
+}
+.toast-item{
+  background:rgba(6,0,26,0.95);border:1px solid var(--border);
+  border-radius:12px;padding:.8rem 1.2rem;
+  font-size:.88rem;color:var(--text);
+  display:flex;align-items:center;gap:.6rem;
+  animation:toastIn .3s ease;
+  box-shadow:0 0 20px rgba(0,229,255,0.15);
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+.toast-item.success{border-color:rgba(0,255,136,.4);}
+.toast-item.error{border-color:rgba(255,77,109,.4);}
+
+/* ── BUTTONS ── */
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:12px;padding:.7rem 1.5rem;
+  color:#03000f;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;
+  cursor:pointer;transition:all .3s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,229,255,0.3);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.7rem 1.5rem;color:var(--text2);
+  font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;
+  cursor:pointer;transition:all .3s;text-decoration:none;
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Logout btn */
+.logout-btn{
+  background:none;border:1px solid rgba(255,77,109,.3);border-radius:8px;
+  padding:.4rem .8rem;color:rgba(255,77,109,.8);font-size:.78rem;
+  font-family:'Syne',sans-serif;cursor:pointer;transition:all .3s;
+}
+.logout-btn:hover{background:rgba(255,77,109,.1);border-color:#ff4d6d;color:#ff4d6d;}
+
+/* Sign-in header button */
+.signin-btn{
+  display:flex;align-items:center;gap:.5rem;
+  background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(180,0,255,0.15));
+  border:1px solid var(--border);border-radius:50px;
+  padding:.45rem 1.1rem;color:var(--accent);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+  cursor:pointer;transition:all .3s;
+}
+.signin-btn:hover{border-color:var(--accent);box-shadow:0 0 20px rgba(0,229,255,0.2);transform:translateY(-1px);}
+.signin-btn svg{width:16px;height:16px;}
+
+/* Guest state hides user chip and logout */
+body.guest .user-chip,body.guest .logout-btn{display:none;}
+body.guest .signin-btn{display:flex;}
+body.loggedin .signin-btn{display:none;}
+body.loggedin .user-chip,body.loggedin .logout-btn{display:flex;}
+
+/* Misc */
+.divider{height:1px;background:linear-gradient(to right,transparent,var(--border),transparent);margin:2rem 0;}
+.text-gradient{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.shimmer{
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.04) 50%,transparent 100%);
+  background-size:200% 100%;
+  animation:shimmer 2s infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  #main{margin-left:0 !important;}
+  header{padding-left:2rem !important;}
+  .menu-btn{display:block;}
+  .personal-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<!-- AUTH MODAL -->
+<div id="authOverlay" onclick="closeAuthOverlay(event)">
+  <div class="auth-box">
+    <div class="auth-logo">Raah-e-Ilm</div>
+    <div class="auth-sub">راہِ علم • Your Path Among the Stars 🌌</div>
+    <div style="color:var(--text2);font-size:.85rem;margin-bottom:1.5rem;line-height:1.6;">Sign in to save your progress, track study time, and manage your subjects.</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.1-6.1C34.46 3.04 29.52 1 24 1 14.82 1 7.02 6.48 3.66 14.28l7.1 5.52C12.4 13.92 17.76 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.52 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h12.67c-.55 2.95-2.2 5.45-4.68 7.12l7.18 5.58C43.45 37.07 46.52 31.26 46.52 24.5z"/>
+        <path fill="#FBBC05" d="M10.76 28.56A14.56 14.56 0 0 1 9.5 24c0-1.59.27-3.13.76-4.56l-7.1-5.52A23.93 23.93 0 0 0 0 24c0 3.87.92 7.53 2.54 10.77l8.22-6.21z"/>
+        <path fill="#34A853" d="M24 47c5.52 0 10.15-1.83 13.53-4.97l-7.18-5.58C28.57 37.79 26.4 38.5 24 38.5c-6.24 0-11.6-4.42-13.24-10.3l-8.22 6.21C6.02 41.52 14.41 47 24 47z"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-note">By signing in, you agree to our Terms of Service.<br>Your data is stored locally in your browser.</div>
+    <div class="auth-msg" id="authMsg"></div>
+    <button onclick="closeAuthOverlay()" style="margin-top:1rem;background:none;border:none;color:var(--text2);font-size:.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;">✕ Continue browsing as guest</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header id="header">
+    <div class="header-logo" onclick="showPage('home')">Raah-e-Ilm</div>
+    <div class="header-right">
+      <button class="signin-btn" onclick="showAuthOverlay()">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.1-6.1C34.46 3.04 29.52 1 24 1 14.82 1 7.02 6.48 3.66 14.28l7.1 5.52C12.4 13.92 17.76 9.5 24 9.5z"/><path fill="#4285F4" d="M46.52 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h12.67c-.55 2.95-2.2 5.45-4.68 7.12l7.18 5.58C43.45 37.07 46.52 31.26 46.52 24.5z"/><path fill="#FBBC05" d="M10.76 28.56A14.56 14.56 0 0 1 9.5 24c0-1.59.27-3.13.76-4.56l-7.1-5.52A23.93 23.93 0 0 0 0 24c0 3.87.92 7.53 2.54 10.77l8.22-6.21z"/><path fill="#34A853" d="M24 47c5.52 0 10.15-1.83 13.53-4.97l-7.18-5.58C28.57 37.79 26.4 38.5 24 38.5c-6.24 0-11.6-4.42-13.24-10.3l-8.22 6.21C6.02 41.52 14.41 47 24 47z"/></svg>
+        Sign In
+      </button>
+      <div class="user-chip" onclick="showPage('personal')">
+        <div class="avatar" id="userAvatar">?</div>
+        <span id="userNameDisplay" style="font-size:.85rem;font-family:'Syne',sans-serif;">User</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <div style="padding:1rem 0;">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active" data-page="home" onclick="showPage('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </div>
+      <div class="nav-item" data-page="personal" onclick="showPage('personal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        My Dashboard
+      </div>
+      <div class="nav-item" data-page="support" onclick="showPage('support')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Support
+      </div>
+
+      <div class="divider" style="margin:1rem 1.5rem;"></div>
+
+      <!-- IGCSE -->
+      <div class="curr-header" onclick="toggleCurr('igcse')">
+        <span>IGCSE</span><span class="curr-toggle">+</span>
+      </div>
+      <div class="curr-subjects" id="igcse-subs"></div>
+
+      <!-- O Levels -->
+      <div class="curr-header" onclick="toggleCurr('olevels')">
+        <span>O Levels</span><span class="curr-toggle">+</span>
+      </div>
+      <div class="curr-subjects" id="olevels-subs"></div>
+
+      <!-- AS Levels -->
+      <div class="curr-header" onclick="toggleCurr('aslevels')">
+        <span>AS Levels</span><span class="curr-toggle">+</span>
+      </div>
+      <div class="curr-subjects" id="aslevels-subs"></div>
+
+      <!-- A Levels -->
+      <div class="curr-header" onclick="toggleCurr('alevels')">
+        <span>A Levels</span><span class="curr-toggle">+</span>
+      </div>
+      <div class="curr-subjects" id="alevels-subs"></div>
+    </div>
+    </div>
+  </nav>
+
+  <main id="main">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="home-hero">
+        <div class="home-title">Navigate Your Universe<br>of Knowledge</div>
+        <div class="home-sub">Select a subject from the sidebar or your personal list to begin studying. Track progress, review notes, and conquer your exams.</div>
+        <div class="home-stats" id="homeStats">
+          <div class="stat-card" style="animation-delay:.1s">
+            <div class="stat-num" id="statSubjects">0</div>
+            <div class="stat-label">My Subjects</div>
+          </div>
+          <div class="stat-card" style="animation-delay:.2s">
+            <div class="stat-num" id="statHours">0h</div>
+            <div class="stat-label">Study Hours</div>
+          </div>
+          <div class="stat-card" style="animation-delay:.3s">
+            <div class="stat-num" id="statDocs">0</div>
+            <div class="stat-label">Docs Viewed</div>
+          </div>
+          <div class="stat-card" style="animation-delay:.4s">
+            <div class="stat-num" id="statStreak">0🔥</div>
+            <div class="stat-label">Day Streak</div>
+          </div>
+        </div>
+        <button class="add-subjects-btn" onclick="openAddSubjModal()">
+          ＋ Add Subjects to My List
+        </button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-title">My Subjects</div>
+      <div class="subjects-grid" id="mySubjectsGrid">
+        <div class="empty-subjects">
+          <div style="font-size:3rem;margin-bottom:1rem;">🌌</div>
+          <div>No subjects added yet. Start exploring the cosmos!</div>
+          <button class="add-subjects-btn" style="margin:1rem auto 0;display:flex;" onclick="openAddSubjModal()">＋ Add Subjects</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBJECT PAGE -->
+    <div class="page" id="page-subject">
+      <div class="subj-page-hero" id="subjHero">
+        <img id="subjHeroImg" src="" alt="">
+        <div class="subj-page-overlay">
+          <div class="subj-page-title" id="subjHeroTitle"></div>
+          <div class="subj-page-badge" id="subjHeroBadge"></div>
+        </div>
+      </div>
+      <div class="page-tabs" id="subjTabs">
+        <div class="page-tab active" onclick="switchTab('notes-tab','subjTabs')">📚 Notes</div>
+        <div class="page-tab" onclick="switchTab('papers-tab','subjTabs')">📄 Past Papers</div>
+        <div class="page-tab" onclick="switchTab('fc-tab','subjTabs')">🃏 Flashcards</div>
+        <div class="page-tab" onclick="switchTab('resources-tab','subjTabs')">🔗 Resources</div>
+      </div>
+      <!-- Notes tab -->
+      <div class="tab-panel active" id="notes-tab">
+        <div class="resource-grid" id="subj-notes-grid"></div>
+      </div>
+      <!-- Papers tab -->
+      <div class="tab-panel" id="papers-tab">
+        <div class="pp-filters" id="subj-pp-filters"></div>
+        <div class="pp-list" id="subj-pp-list"></div>
+      </div>
+      <!-- Flashcards tab -->
+      <div class="tab-panel" id="fc-tab">
+        <div class="fc-progress" id="fcProgress">Card 1 of 1</div>
+        <div class="flashcard-container">
+          <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="flashcard-face flashcard-front">
+              <div class="fc-q" id="fcQuestion">Question</div>
+              <div class="fc-hint">Click to reveal answer</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <div class="fc-a" id="fcAnswer">Answer</div>
+            </div>
+          </div>
+        </div>
+        <div class="fc-controls">
+          <button class="fc-btn prev" onclick="prevCard()">← Prev</button>
+          <button class="fc-btn next" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+      <!-- Resources tab -->
+      <div class="tab-panel" id="resources-tab">
+        <div class="resource-grid" id="subj-resources-grid"></div>
+      </div>
+    </div>
+
+    <!-- NOTES PAGE -->
+    <div class="page" id="page-notes">
+      <div style="margin-bottom:2rem;">
+        <div class="home-title" style="font-size:2rem;text-align:left;margin-bottom:.5rem;">Study Notes</div>
+        <div style="color:var(--text2);">Comprehensive notes across all curricula and subjects</div>
+      </div>
+      <div class="notes-search">
+        <input class="search-input" placeholder="🔍 Search notes..." id="notesSearch" oninput="filterNotes()">
+        <select class="filter-select" id="notesCurrFilter" onchange="filterNotes()" style="color:var(--text2);">
+          <option value="">All Curricula</option>
+          <option>IGCSE</option><option>O Levels</option><option>AS Levels</option>
+          <option>A Levels</option>
+        </select>
+      </div>
+      <div class="notes-grid" id="notesGrid"></div>
+    </div>
+
+    <!-- PAST PAPERS PAGE -->
+    <div class="page" id="page-pastpapers">
+      <div style="margin-bottom:2rem;">
+        <div class="home-title" style="font-size:2rem;text-align:left;margin-bottom:.5rem;">Past Papers</div>
+        <div style="color:var(--text2);">Official past papers and marking schemes from Cambridge International</div>
+      </div>
+      <div class="pp-filters" id="ppFilters">
+        <div class="pp-filter active" onclick="filterPP('all',this)">All</div>
+        <div class="pp-filter" onclick="filterPP('IGCSE',this)">IGCSE</div>
+        <div class="pp-filter" onclick="filterPP('O Levels',this)">O Levels</div>
+        <div class="pp-filter" onclick="filterPP('AS Levels',this)">AS Levels</div>
+        <div class="pp-filter" onclick="filterPP('A Levels',this)">A Levels</div>
+      </div>
+      <div class="pp-list" id="ppList"></div>
+    </div>
+
+    <!-- FLASHCARDS PAGE -->
+    <div class="page" id="page-flashcards">
+      <div style="margin-bottom:2rem;">
+        <div class="home-title" style="font-size:2rem;text-align:left;margin-bottom:.5rem;">Flashcard Decks</div>
+        <div style="color:var(--text2);">Choose a deck and start memorising key concepts</div>
+      </div>
+      <div class="subjects-grid" id="fcDecksGrid"></div>
+    </div>
+
+    <!-- PERSONAL DASHBOARD -->
+    <div class="page" id="page-personal">
+      <div style="margin-bottom:2rem;">
+        <div class="home-title" style="font-size:2rem;text-align:left;margin-bottom:.5rem;" id="personalTitle">My Dashboard</div>
+        <div style="color:var(--text2);">Track your progress and study activity</div>
+      </div>
+      <div class="personal-grid">
+        <div class="personal-card">
+          <h3>📈 Weekly Study Activity</h3>
+          <div class="chart-wrap"><canvas id="activityChart"></canvas></div>
+        </div>
+        <div class="personal-card">
+          <h3>🎯 Time Per Subject</h3>
+          <div class="chart-wrap"><canvas id="subjChart"></canvas></div>
+        </div>
+      </div>
+      <div class="personal-grid">
+        <div class="personal-card">
+          <h3>📚 Subject Breakdown</h3>
+          <div class="study-subjects-list" id="studySubjList"></div>
+        </div>
+        <div class="personal-card">
+          <h3>📋 Recent Activity</h3>
+          <div class="activity-log" id="activityLog"></div>
+        </div>
+      </div>
+      <div class="personal-card" style="margin-bottom:1.5rem;">
+        <h3>⚙️ Manage My Subjects</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+          <div style="font-size:.88rem;color:var(--text2);">Add or remove subjects from your personal dashboard</div>
+          <button class="btn-primary" onclick="openAddSubjModal()">＋ Add Subjects</button>
+        </div>
+        <div class="my-subj-grid" id="manageSubjGrid"></div>
+      </div>
+    </div>
+
+    <!-- SUPPORT PAGE -->
+    <div class="page" id="page-support">
+      <div class="support-hero">
+        <h1>How can we help?</h1>
+        <div style="color:var(--text2);max-width:600px;margin:0 auto;">Everything you need to get the most out of Raah-e-Ilm</div>
+      </div>
+      <div class="support-grid">
+        <div class="support-card">
+          <h3>🚀 Getting Started</h3>
+          <ul>
+            <li>Create an account or sign in</li>
+            <li>Add your subjects from the dashboard</li>
+            <li>Click any curriculum in the sidebar to explore</li>
+            <li>Use tabs inside a subject for Notes, Papers, Flashcards</li>
+          </ul>
+        </div>
+        <div class="support-card">
+          <h3>📚 Study Resources</h3>
+          <p>All resources link to free, publicly available materials from ZNotes, Save My Exams, PapaCambridge, Revision Village, and official board websites.</p>
+        </div>
+        <div class="support-card">
+          <h3>🌌 Coming Soon</h3>
+          <ul>
+            <li>AI-powered question answering</li>
+            <li>Custom flashcard creation</li>
+            <li>Study group rooms</li>
+            <li>Exam countdown timers</li>
+            <li>Mobile app</li>
+          </ul>
+        </div>
+        <div class="support-card">
+          <h3>📊 Dashboard & Tracking</h3>
+          <p>Your study time, documents viewed, and flashcard progress are automatically tracked. Visit "My Dashboard" to see your weekly activity graphs and subject breakdown.</p>
+        </div>
+      </div>
+      <div class="personal-card">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);margin-bottom:1.5rem;">❓ Frequently Asked Questions</h3>
+        <div id="faqContainer"></div>
+      </div>
+      <div style="text-align:center;margin-top:3rem;padding:2rem;color:var(--text2);">
+        <div style="font-size:1.5rem;margin-bottom:.5rem;">✉️</div>
+        <div>Need more help? Email us at <strong style="color:var(--accent);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="83f0f6f3f3ecf1f7c3f1e2e2ebaee6aeeaefeeade0ecee">[email&#160;protected]</a></strong></div>
+        <div style="margin-top:.5rem;font-style:italic;">Happy learning — may the stars guide your path! 🌟</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Add Subject Modal -->
+<div id="addSubjModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Add Subjects to My List</div>
+      <button class="modal-close" onclick="closeAddSubjModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeAddSubjModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveSelectedSubjects()">Save ✓</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ══════════════════════════════════
+// CANVAS BACKGROUND
+// ══════════════════════════════════
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [], shootingStars = [], nebulae = [], frameCount = 0;
+let meteorEnabled = false;
+// Delay meteors by 4 seconds
+setTimeout(() => { meteorEnabled = true; }, 4000);
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars = [];
+  // Layer 1: tiny pin-dot distant stars (many, very dim, very slow twinkle)
+  for (let i = 0; i < 400; i++) {
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 0.35 + 0.15,   // tiny dots max 0.5px
+      o: Math.random() * 0.4 + 0.05,
+      s: Math.random() * 0.006 + 0.003,
+      d: Math.random() > .5 ? 1 : -1,
+      color: '210,225,255',
+      layer: 1
+    });
+  }
+  // Layer 2: small mid dots with gentle twinkle
+  for (let i = 0; i < 180; i++) {
+    const hue = Math.random();
+    const color = hue < 0.4 ? '190,215,255' : hue < 0.7 ? '255,245,210' : '210,190,255';
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 0.5 + 0.2,     // max 0.7px
+      o: Math.random() * 0.5 + 0.1,
+      s: Math.random() * 0.008 + 0.004,
+      d: Math.random() > .5 ? 1 : -1,
+      color, layer: 2
+    });
+  }
+  // Layer 3: slightly brighter accent dots (very few)
+  for (let i = 0; i < 40; i++) {
+    const hue = Math.random();
+    const color = hue < 0.4 ? '150,210,255' : hue < 0.7 ? '255,210,140' : '210,150,255';
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 0.6 + 0.3,     // max 0.9px
+      o: Math.random() * 0.4 + 0.3,
+      s: Math.random() * 0.01 + 0.005,
+      d: Math.random() > .5 ? 1 : -1,
+      color, layer: 3
+    });
+  }
+
+  // Subtle nebula blobs
+  nebulae = [];
+  for (let i = 0; i < 4; i++) {
+    nebulae.push({
+      x: Math.random() * W, y: Math.random() * H,
+      rx: Math.random() * 280 + 120, ry: Math.random() * 180 + 80,
+      color: Math.random() > .5 ? 'rgba(0,229,255,' : 'rgba(180,0,255,',
+      o: Math.random() * 0.03 + 0.008
+    });
+  }
+}
+
+function spawnShootingStar() {
+  if (!meteorEnabled) return;
+  // One meteor every ~4 seconds (at 60fps ~240 frames); chance per frame ~0.0042
+  if (Math.random() > 0.0042) return;
+  const angle = (Math.random() * 35 + 10) * Math.PI / 180;
+  const x = Math.random() * W * 0.85;
+  const y = Math.random() * H * 0.5;
+  const speed = 6 + Math.random() * 4;  // moderate — roughly 4s apart
+  const tint = Math.random();
+  const [cr,cg,cb] = tint < 0.35 ? [255,255,255] : tint < 0.6 ? [180,240,255] : tint < 0.8 ? [255,230,160] : [220,180,255];
+  shootingStars.push({
+    x, y,
+    vx: Math.cos(angle) * speed,
+    vy: Math.sin(angle) * speed,
+    len: Math.random() * 140 + 60,
+    width: 1 + Math.random() * 0.8,
+    cr, cg, cb,
+    o: 0, life: 1,           // start transparent — fade in
+    fadeIn: 0,               // 0→1 over first 0.3 of life
+    decay: 0.008 + Math.random() * 0.006,
+  });
+}
+
+function drawStar(s) {
+  // Soft glow halo behind every star for twinkle effect
+  if (s.o > 0.25) {
+    const glowR = s.r * (3 + s.o * 3);
+    const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
+    grad.addColorStop(0, `rgba(${s.color},${s.o * 0.35})`);
+    grad.addColorStop(1, `rgba(${s.color},0)`);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, glowR, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+  // Sharp dot centre
+  ctx.beginPath();
+  ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(${s.color},${s.o})`;
+  ctx.fill();
+}
+
+function animBg() {
+  ctx.clearRect(0, 0, W, H);
+  frameCount++;
+
+  // Draw nebulae
+  nebulae.forEach(n => {
+    const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, Math.max(n.rx, n.ry));
+    grad.addColorStop(0, n.color + n.o + ')');
+    grad.addColorStop(1, n.color + '0)');
+    ctx.save();
+    ctx.scale(1, n.ry / n.rx);
+    ctx.beginPath();
+    ctx.arc(n.x, n.y * (n.rx / n.ry), n.rx, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Twinkle & draw all stars
+  stars.forEach(s => {
+    s.o += s.s * s.d;
+    const maxO = s.layer === 1 ? 0.55 : s.layer === 2 ? 0.65 : 0.75;
+    const minO = s.layer === 1 ? 0.04 : 0.07;
+    if (s.o > maxO || s.o < minO) s.d *= -1;
+    drawStar(s);
+  });
+
+  // Meteors
+  spawnShootingStar();
+  shootingStars = shootingStars.filter(ss => ss.life > 0);
+  shootingStars.forEach(ss => {
+    ss.x += ss.vx;
+    ss.y += ss.vy;
+    ss.life -= ss.decay;
+    // Smooth fade-in over first 20% of life
+    ss.fadeIn = Math.min(1, ss.fadeIn + 0.05);
+    ss.o = Math.min(ss.fadeIn, Math.max(0, ss.life)) * 0.9;
+
+    const tailX = ss.x - ss.vx * (ss.len / ss.vx / Math.hypot(ss.vx, ss.vy) * 0 + ss.len / 10);
+    const tailY = ss.y - ss.vy * (ss.len / 10);
+    const grad = ctx.createLinearGradient(ss.x, ss.y, tailX, tailY);
+    grad.addColorStop(0, `rgba(${ss.cr},${ss.cg},${ss.cb},${ss.o})`);
+    grad.addColorStop(0.3, `rgba(${ss.cr},${ss.cg},${ss.cb},${ss.o * 0.4})`);
+    grad.addColorStop(1, `rgba(${ss.cr},${ss.cg},${ss.cb},0)`);
+    ctx.beginPath();
+    ctx.moveTo(ss.x, ss.y);
+    ctx.lineTo(tailX, tailY);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = ss.width;
+    ctx.stroke();
+    // Soft glowing head
+    ctx.beginPath();
+    ctx.arc(ss.x, ss.y, ss.width * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${ss.o * 0.9})`;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animBg);
+}
+
+resize(); initStars(); animBg();
+window.addEventListener('resize', () => { resize(); initStars(); });
+
+// ══════════════════════════════════
+// DATA: CURRICULA & SUBJECTS
+// ══════════════════════════════════
+const CURRICULA = {
+  igcse:{label:'IGCSE',subjects:[
+    {id:'ig-maths',name:'Math'},
+    {id:'ig-addmaths',name:'Additional Math'},
+    {id:'ig-physics',name:'Physics'},
+    {id:'ig-chemistry',name:'Chemistry'},
+    {id:'ig-biology',name:'Biology'},
+    {id:'ig-computer',name:'Computer Science'},
+    {id:'ig-ict',name:'ICT'},
+    {id:'ig-business',name:'Business Studies'},
+    {id:'ig-economics',name:'Economics'},
+    {id:'ig-accounting',name:'Accounting'},
+    {id:'ig-history',name:'History'},
+    {id:'ig-envman',name:'Environmental Management'},
+  ]},
+  olevels:{label:'O Levels',subjects:[
+    {id:'ol-maths',name:'Math'},
+    {id:'ol-physics',name:'Physics'},
+    {id:'ol-chemistry',name:'Chemistry'},
+    {id:'ol-biology',name:'Biology'},
+    {id:'ol-computer',name:'Computer Science'},
+    {id:'ol-business',name:'Business Studies'},
+    {id:'ol-economics',name:'Economics'},
+    {id:'ol-accounting',name:'Accounting'},
+  ]},
+  aslevels:{label:'AS Levels',subjects:[
+    {id:'as-maths',name:'Math'},
+    {id:'as-physics',name:'Physics'},
+    {id:'as-chemistry',name:'Chemistry'},
+    {id:'as-biology',name:'Biology'},
+    {id:'as-computer',name:'Computer Science'},
+    {id:'as-business',name:'Business'},
+  ]},
+  alevels:{label:'A Levels',subjects:[
+    {id:'a-maths',name:'Math'},
+    {id:'a-physics',name:'Physics'},
+    {id:'a-chemistry',name:'Chemistry'},
+    {id:'a-biology',name:'Biology'},
+    {id:'a-computer',name:'Computer Science'},
+    {id:'a-business',name:'Business'},
+  ]},
+};
+
+const SUBJ_ICONS = {
+  maths:'🔢',math:'🔢',mathematics:'🔢',calculus:'📐',addmaths:'📊',
+  biology:'🧬',chemistry:'⚗️',physics:'⚛️',
+  business:'💼',economics:'📈',accounting:'🧮',
+  computer:'💻',ict:'🖥️',
+  history:'📜',geography:'🌍',psychology:'🧠',
+  envman:'🌿',envsci:'🌱',humangeo:'🗺️',ess:'🌎',
+};
+function getIcon(id){
+  const k=id.split('-').slice(1).join('').toLowerCase();
+  for(const[key,icon] of Object.entries(SUBJ_ICONS)){if(k.includes(key))return icon;}
+  return '📖';
+}
+
+// Per-subject images — Unsplash stable photo IDs (free to use)
+const SUBJ_IMAGES = {
+  // ── IGCSE ──
+  'ig-maths':     'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200&q=80',
+  'ig-addmaths':  'https://images.unsplash.com/photo-1509228627929-8243eb4676d2?w=1200&q=80',
+  'ig-physics':   'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=1200&q=80',
+  'ig-chemistry': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=1200&q=80',
+  'ig-biology':   'https://images.unsplash.com/photo-1576086213369-97a306d36557?w=1200&q=80',
+  'ig-computer':  'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1200&q=80',
+  'ig-ict':       'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80',
+  'ig-business':  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80',
+  'ig-economics': 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80',
+  'ig-accounting':'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80',
+  'ig-history':   'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=1200&q=80',
+  'ig-envman':    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
+  // ── O Levels ──
+  'ol-maths':     'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=1200&q=80',
+  'ol-physics':   'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=1200&q=80',
+  'ol-chemistry': 'https://images.unsplash.com/photo-1603126857599-f6e157fa2fe6?w=1200&q=80',
+  'ol-biology':   'https://images.unsplash.com/photo-1530026186672-2cd00ffc50fe?w=1200&q=80',
+  'ol-computer':  'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&q=80',
+  'ol-business':  'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1200&q=80',
+  'ol-economics': 'https://images.unsplash.com/photo-1543286386-713bdd548da4?w=1200&q=80',
+  'ol-accounting':'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1200&q=80',
+  // ── AS Levels ──
+  'as-maths':     'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200&q=80',
+  'as-physics':   'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=1200&q=80',
+  'as-chemistry': 'https://images.unsplash.com/photo-1628863353691-0071c8c1874c?w=1200&q=80',
+  'as-biology':   'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=1200&q=80',
+  'as-computer':  'https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1200&q=80',
+  'as-business':  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80',
+  // ── A Levels ──
+  'a-maths':      'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?w=1200&q=80',
+  'a-physics':    'https://images.unsplash.com/photo-1581093588401-fbb62a02f120?w=1200&q=80',
+  'a-chemistry':  'https://images.unsplash.com/photo-1574607383476-f517f260d30b?w=1200&q=80',
+  'a-biology':    'https://images.unsplash.com/photo-1530210124550-912dc1381cb8?w=1200&q=80',
+  'a-computer':   'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&q=80',
+  'a-business':   'https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=1200&q=80',
+}
+function getImage(id){
+  if(SUBJ_IMAGES[id]) return SUBJ_IMAGES[id];
+  // fallback: keyword match on subject part
+  const parts = id.split('-').slice(1).join('');
+  for(const [k,img] of Object.entries(SUBJ_IMAGES)){
+    const kPart = k.split('-').slice(1).join('');
+    if(parts && kPart && (parts.includes(kPart) || kPart.includes(parts))) return img;
+  }
+  return FALLBACK_IMG;
+}
+
+// Notes data
+const SUBJECT_NOTES = {
+  'ig-biology': [
+    {icon:'🧬',title:'Characteristics, Classification & Features of Organisms',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/K82W65SdcVj5Cgcc.pdf'},
+    {icon:'🔬',title:'Cell Structure & Size of Specimens',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/M5ZTj4rfnRhqfQsx.pdf'},
+    {icon:'💧',title:'Diffusion, Osmosis & Active Transport',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nGgwGyt3BqxtBRG9.pdf'},
+    {icon:'🧪',title:'Biological Molecules',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/fh6574MM2G4zR4Px.pdf'},
+    {icon:'⚗️',title:'Enzymes',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/mjN5YyTYmqghSZdK.pdf'},
+    {icon:'🌿',title:'Photosynthesis & Leaf Structure',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ppCKgKZFbzM6q636.pdf'},
+    {icon:'🍽️',title:'Human Diet & Digestion',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/DtNX3JRyRcWxqdym.pdf'},
+    {icon:'🌱',title:'Transport in Plants',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VvQV2qV8cGXQcxQk.pdf'},
+    {icon:'❤️',title:'Circulatory Systems, Heart & Blood Vessels',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/wfPjY5k9YsT3NHmn.pdf'},
+    {icon:'🦠',title:'Diseases & Immunity',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/7g8JRQmKdgHRB56F.pdf'},
+    {icon:'🫁',title:'Gas Exchange in Humans',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/3kwv8S6KgYD5wks2.pdf'},
+    {icon:'⚡',title:'Respiration',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Y4wPJN8SNkvGtMMj.pdf'},
+    {icon:'🚽',title:'Excretion in Humans',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/3Vc48fsJZW6QnCg5.pdf'},
+    {icon:'🧠',title:'Coordination, Response & Homeostasis',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PDN5wYyzJsSW3jmQ.pdf'},
+    {icon:'💊',title:'Drugs in Medicine',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nhKY69CYDqKTkDpM.pdf'},
+    {icon:'🌸',title:'Reproduction in Plants & Humans',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/W9vDpvmbwHgyVPBz.pdf'},
+    {icon:'🧬',title:'Inheritance, Genes & Cell Division',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8FZ3XPkvPKZF6JdQ.pdf'},
+    {icon:'🦎',title:'Variation & Natural Selection',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GZ3BVQt9nQMVt3Pb.pdf'},
+    {icon:'🌍',title:'Energy & Feeding Relationships',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9M5Sxvqzf9YnmhZr.pdf'},
+    {icon:'♻️',title:'Human Impact: Biodiversity, Pollution & Conservation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qVZCr6H75NyqqXpC.pdf'},
+    {icon:'🔭',title:'Biotechnology & Genetic Modification',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/DwwjCSY5syCN983n.pdf'},
+  ],
+  'ig-physics': [
+    {icon:'📏',title:'Physical Quantities & Measurement Techniques',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8y8KhckRK9Y6f9wm.pdf'},
+    {icon:'🏃',title:'Motion',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/4qqqdtxMKTHv5YJP.pdf'},
+    {icon:'⚖️',title:'Mass, Weight & Density',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GVF88nH5zMqBZ2MV.pdf'},
+    {icon:'💪',title:'Effects of Forces',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/m65PKFwYvr9sDTkz.pdf'},
+    {icon:'🔧',title:'Moments',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/MV9ZT9khDv8NTwQY.pdf'},
+    {icon:'🎱',title:'Momentum',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/hSk68vVqRNfc52tw.pdf'},
+    {icon:'⚡',title:'Energy, Work & Power',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6DjV2cwCBhhFYJyh.pdf'},
+    {icon:'🔋',title:'Energy Sources',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/CJNQpSXHBP8fxs9v.pdf'},
+    {icon:'🌊',title:'Pressure',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/QT2rhmXMqWhRyHct.pdf'},
+    {icon:'🔵',title:'Kinetic Particle Model of Matter',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6T78yfPnmw4hqpzf.pdf'},
+    {icon:'🌡️',title:'Thermal Properties & Temperature',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/yxjCZWCHb67hknYf.pdf'},
+    {icon:'🔥',title:'Transfer of Thermal Energy',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/hsrRbX7n8WY7nDMT.pdf'},
+    {icon:'〰️',title:'General Properties of Waves',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/P5PnynnCqp7dX2wG.pdf'},
+    {icon:'💡',title:'Light',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/jwsMJS5sxztTJbxx.pdf'},
+    {icon:'📡',title:'Electromagnetic Spectrum',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/fTWv5qjyWZnTwQfN.pdf'},
+    {icon:'🔊',title:'Sound',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2NsqSfcqJtgBhxyJ.pdf'},
+    {icon:'🧲',title:'Simple Phenomena of Magnetism',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kQVTGsxg55PyBrgy.pdf'},
+    {icon:'⚡',title:'Electrical Quantities',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/bsxNf9sMB4j4tnSv.pdf'},
+    {icon:'🔌',title:'Electric Circuits & Electrical Safety',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xtV6RdzBN3CDQf8d.pdf'},
+    {icon:'🌀',title:'Electromagnetic Effects',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nvPRfbBwZ6d5PKxh.pdf'},
+    {icon:'⚛️',title:'The Nuclear Model of the Atom',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qRcr59dPtbg4pvDf.pdf'},
+    {icon:'☢️',title:'Radioactivity',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/bHPYPHxWjRgZQBH5.pdf'},
+    {icon:'🌍',title:'Earth & the Solar System',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9HdmnW2fcQjsJkhy.pdf'},
+    {icon:'⭐',title:'Stars & the Universe',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/RJyt2fvt2DSPX7mn.pdf'},
+  ],
+  'ig-chemistry': [
+    {icon:'🧊',title:'Solids, Liquids & Gases',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/jp2SW5NDBvmbtVng.pdf'},
+    {icon:'⚛️',title:'Atomic Structure & the Periodic Table',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Y5bKwqVfY4dvFQbQ.pdf'},
+    {icon:'🔗',title:'Ions & Ionic Bonds',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Wtc4dFXXmNdyTBgG.pdf'},
+    {icon:'🔬',title:'Simple Molecules & Covalent Bonds',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/hbJK7ZnzcT7rs2Gp.pdf'},
+    {icon:'🏗️',title:'Giant Structures',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/m26jjDWNvfrgQNNX.pdf'},
+    {icon:'📐',title:'Formulae & Relative Masses',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/RCb6SPN4nmbKTrTN.pdf'},
+    {icon:'🔢',title:'The Mole & the Avogadro Constant',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Tvv2TtWgVDhvb2Sk.pdf'},
+    {icon:'⚡',title:'Electrolysis',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/gznnYzB4qZPdZBBq.pdf'},
+    {icon:'🏭',title:'Applications of Electrolysis',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FnQwrMMrn5F7K549.pdf'},
+    {icon:'🔥',title:'Exothermic & Endothermic Reactions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/zfJHcRVccqjJ7QDz.pdf'},
+    {icon:'⚗️',title:'Chemical Change & Rate of Reaction',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/XqdRqSxrs8y96DPt.pdf'},
+    {icon:'↔️',title:'Reversible Reactions & Equilibrium',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/DWMpBtTbwPJwq5mC.pdf'},
+    {icon:'🔄',title:'Redox',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/f2CXVGFqmbKmrvmr.pdf'},
+    {icon:'🧪',title:'The Characteristic Properties of Acids & Bases',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/wgZ6GDv52Hkjf9Qy.pdf'},
+    {icon:'🧂',title:'Preparation of Salts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/dXxJMT5wBxKcG5th.pdf'},
+    {icon:'📊',title:'The Periodic Table & Trends',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kXWfpGyVw94K9y6W.pdf'},
+    {icon:'🔷',title:'Group Properties & Trends',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/bt4NswGwYGBx7j8b.pdf'},
+    {icon:'🔩',title:'Properties, Uses & Alloys of Metals',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/pZfbtgZzKZDrt5Gc.pdf'},
+    {icon:'🦀',title:'Reactivity Series & Corrosion of Metals',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xpWwZ5VYsMN5hbNK.pdf'},
+    {icon:'⛏️',title:'Extraction of Metals',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/pRtgctfc5PRcmHdM.pdf'},
+    {icon:'💧',title:'Water & Water Pollution',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PhFfVX76NfWBkdSX.pdf'},
+    {icon:'🌫️',title:'Air Quality & Climate',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/H94HRs3zYgHzNSYd.pdf'},
+    {icon:'🧬',title:'Formulae, Functional Groups & Terminology',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8wrDdTGFVQFHkvrx.pdf'},
+    {icon:'🏠',title:'Organic Families',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2z2y3wkW65pf95P8.pdf'},
+    {icon:'🧵',title:'Polymers',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/K26bBvcwy5Q2Y3tn.pdf'},
+    {icon:'🔭',title:'Experimental Techniques',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kxVWcq6wxJVknH52.pdf'},
+    {icon:'🧹',title:'Separation & Purification',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qzjCMB8xBHHKn56T.pdf'},
+    {icon:'🔍',title:'Identification of Ions & Gases',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FSqbdVwZMZ7Fq7DD.pdf'},
+  ],
+  'ig-computer': [
+    {icon:'🔢',title:'Number Systems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Gv5vfgVx9yCCZDWz.pdf'},
+    {icon:'🔤',title:'Text, Sound & Images',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/3PbRYyJBXp8HVhfj.pdf'},
+    {icon:'💾',title:'Data Storage & Compression',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/583q3xbxdrcJCvS7.pdf'},
+    {icon:'📡',title:'Types & Methods of Data Transmission',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/z4zgYZmsBzhQ2Vvk.pdf'},
+    {icon:'🔎',title:'Methods of Error Detection',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/byqp6xVM4VfYn5B9.pdf'},
+    {icon:'🔐',title:'Encryption',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/vThHRRknsjXgnz89.pdf'},
+    {icon:'🖥️',title:'Computer Architecture',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qtspnb3kSpTQvysB.pdf'},
+    {icon:'🖱️',title:'Input & Output Devices',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6W26F6MR2VP7v7n6.pdf'},
+    {icon:'💿',title:'Data Storage',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PT4JvghfqXScf3Gj.pdf'},
+    {icon:'🌐',title:'Network Hardware',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VzW5zSRWTbCzVgbK.pdf'},
+    {icon:'⚙️',title:'Types of Software & Interrupts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/js8K39SvPK86hwYq.pdf'},
+    {icon:'💻',title:'Types of Programming Language, Translators & IDEs',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ST9drwT9wH5pNyQY.pdf'},
+    {icon:'🌍',title:'The Internet & the World Wide Web',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/WkPSfdk5s77nxwdr.pdf'},
+    {icon:'💰',title:'Digital Currency',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/RfjGthB8rQjBSKH4.pdf'},
+    {icon:'🛡️',title:'Cyber Security',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/MhFmrKGZCSqyrTMZ.pdf'},
+    {icon:'🤖',title:'Automated Systems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xsFM4njdysjx3H75.pdf'},
+    {icon:'🦾',title:'Robotics',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/7GrmmRVGVV9wbQfk.pdf'},
+    {icon:'🧠',title:'Artificial Intelligence',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Nyb6H3qrrrBqbcGg.pdf'},
+    {icon:'🔄',title:'Development Life Cycle',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/zFMhjS6BDwMY6p2J.pdf'},
+    {icon:'🖧',title:'Computer Sub-Systems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VxbDFqwrqkgNPvc4.pdf'},
+    {icon:'📋',title:'Algorithms',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/CTXMXZFBp6prYpxR.pdf'},
+    {icon:'📐',title:'Standard Methods of a Solution',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NXqTv4TvTzr2Njd9.pdf'},
+    {icon:'✅',title:'Validation & Verification',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/BbMJK9xNJKsYw5mx.pdf'},
+    {icon:'🐛',title:'Identifying Errors',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/yXfhk33XwYxN7vVm.pdf'},
+    {icon:'💡',title:'Programming Concepts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FXfDJVH2YwKPN5KN.pdf'},
+    {icon:'📦',title:'Arrays',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/g2H5fQYVWRfK5cMC.pdf'},
+    {icon:'📁',title:'File Handling',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2CxhrP3cVSN8XYvP.pdf'},
+    {icon:'🗄️',title:'Databases',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/WJ9zMmm5Tqs9ZHvb.pdf'},
+    {icon:'🔍',title:'SQL',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/5Z3XcM5sbFJVG6QM.pdf'},
+    {icon:'🔀',title:'Boolean Logic',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/95yFQSxZYnd3rgQp.pdf'},
+    {icon:'📝',title:'The Exam Papers',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/f5R8HDsr4XkC9KhW.pdf'},
+    {icon:'✍️',title:'Structuring Your Responses',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GGhxM4qCBk95hqfd.pdf'},
+  ],
+  'ig-maths': [
+    {icon:'🔢',title:'Number Toolkit',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9rPP8x8tFW45m23k.pdf'},
+    {icon:'🔵',title:'Set Notation & Venn Diagrams',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Y3xBB78B9vsWmDpm.pdf'},
+    {icon:'🔑',title:'Prime Factors, HCF & LCM',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KB6hgN97q64j7sKx.pdf'},
+    {icon:'💪',title:'Powers, Roots & Standard Form',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VCYgVR4dzTSfdCPs.pdf'},
+    {icon:'🍕',title:'Fractions Toolkit',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/vfBx3mywGnSgkbT4.pdf'},
+    {icon:'📊',title:'Percentages Toolkit',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kyCB4fM637yZxTtq.pdf'},
+    {icon:'💰',title:'Simple & Compound Interest, Growth & Decay',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/tQrkZ4TtdsmP6NvC.pdf'},
+    {icon:'√',title:'Surds',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FN5qP3vW7sqJxzkd.pdf'},
+    {icon:'🔄',title:'Working with FDP',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6scGMbJQbNB9MrMP.pdf'},
+    {icon:'⚖️',title:'Working with Ratios',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PhvR6fHHvQvnxnQT.pdf'},
+    {icon:'🚗',title:'Compound Measures (Speed, Density, and Pressure)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/M56Ygzp8PXxYJ7S6.pdf'},
+    {icon:'🕐',title:'Time, Currency & Conversions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/WTP46TyM5JmTHtp3.pdf'},
+    {icon:'🎯',title:'Rounding, Estimation & Bounds',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/p9ThCYnFhgWMVBzG.pdf'},
+    {icon:'🧮',title:'Using a Calculator',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/HZWxntTctpKDGF4Z.pdf'},
+    {icon:'🔡',title:'Algebra Toolkit',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/sfK3DXDtV8K54wJV.pdf'},
+    {icon:'🌱',title:'Algebraic Roots & Indices',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZQxct7K9ntXRMhxM.pdf'},
+    {icon:'📦',title:'Expanding & Factorising Brackets',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9NB9bdbVkhSgJtWP.pdf'},
+    {icon:'📏',title:'Linear Equations & Inequalities',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nGTXWXbS7tncQ59h.pdf'},
+    {icon:'❓',title:'Quadratic Equations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/SrTWdNNZq5WnqNN2.pdf'},
+    {icon:'🔁',title:'Rearranging Formulas',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PGyv3kgC7scBpNDW.pdf'},
+    {icon:'🔀',title:'Simultaneous Equations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/N2krvyWb7H77sDdN.pdf'},
+    {icon:'🧩',title:'Algebraic Fractions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/fNzJt6xJC2MfpVnw.pdf'},
+    {icon:'🏗️',title:'Forming & Solving Equations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/P3NQKfqmvcfZXxxZ.pdf'},
+    {icon:'𝑓',title:'Functions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/vzhZthsv7t4HtJQW.pdf'},
+    {icon:'🔢',title:'Sequences',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/JHmYS5VfFCTdWphx.pdf'},
+    {icon:'📐',title:'Proportion',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZNd8tf25z6j6FMkX.pdf'},
+    {icon:'📍',title:'Coordinate Geometry',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xh6Z3K2CVcV2VnqK.pdf'},
+    {icon:'📈',title:'Linear Graphs',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ymm7SQrBsNdpQX4w.pdf'},
+    {icon:'🔼',title:'Quadratic Graphs',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VP2z48cKKwZYvssT.pdf'},
+    {icon:'📉',title:'Further Graphs & Tangents',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6sFG89pfZP2bmk2B.pdf'},
+    {icon:'⚠️',title:'Solving & Graphing Inequalities',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZWZszdxrkHdY7WMG.pdf'},
+    {icon:'🌍',title:'Real-Life Graphs',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GhMmjyBZwxS7XQT8.pdf'},
+    {icon:'∂',title:'Differentiation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Q5F2KWtgbRQJwqzK.pdf'},
+    {icon:'📐',title:'Geometry Toolkit',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KD2mzKRYCPbWQBX4.pdf'},
+    {icon:'🔺',title:'Angles in Polygons & Parallel Lines',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/g3B7KtxVJ6n6PxPd.pdf'},
+    {icon:'🧭',title:'Bearings, Constructions & Scale Drawings',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/XBnj5Yp2TYsmMfX2.pdf'},
+    {icon:'⭕',title:'Circle Theorems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PR9rDWNr9rSfBXn9.pdf'},
+    {icon:'📦',title:'Area & Perimeter',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GDM2HTbyvqXP6s4S.pdf'},
+    {icon:'🔵',title:'Circles, Arcs & Sectors',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KQCgqNNRck6cmhVV.pdf'},
+    {icon:'📦',title:'Volume & Surface Area',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/HgcpCg7JxMpcChkf.pdf'},
+    {icon:'🔄',title:'Congruence & Similarity',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZFFHNFByktj3qPyr.pdf'},
+    {icon:'📐',title:'Right-Angled Triangles (Pythagoras & Trigonometry)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VsfFDppNjJGVqPdd.pdf'},
+    {icon:'🔺',title:'Sine, Cosine Rule & Area of Triangles',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/gYC8JMdwkzFCSGQx.pdf'},
+    {icon:'🧊',title:'3D Pythagoras & Trigonometry',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/JXVnt3gkfwCGwdJ3.pdf'},
+    {icon:'〰️',title:'Trigonometric Graphs & Equations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Bjrz6Rxxdb845FmM.pdf'},
+    {icon:'➡️',title:'Vectors',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/dQKYqCGYk3PsN2G4.pdf'},
+    {icon:'🔄',title:'Transformations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/HsDTkWyCFxS6nxHs.pdf'},
+    {icon:'🎲',title:'Basic Probability',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NSRVQxdynSfymcSM.pdf'},
+    {icon:'🌳',title:'Probability Diagrams (Tree & Venn Diagrams)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/JNrwMTvCqnMPC6tg.pdf'},
+    {icon:'🎯',title:'Conditional Probability',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kF2tw3nzkVXmYv4n.pdf'},
+    {icon:'📊',title:'Averages & Range',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/3hhn3Sjhn65BM34b.pdf'},
+    {icon:'📉',title:'Statistical Diagrams',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/yxRcXJVdcxc5tq5b.pdf'},
+    {icon:'📊',title:'Histograms',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kns5NfnxrGxWpd4s.pdf'},
+    {icon:'📈',title:'Cumulative Frequency',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xNtbHMbyvKhfs5z3.pdf'},
+    {icon:'🔵',title:'Scatter Graphs & Correlation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/hzbpTt4ZFN5Wz7Vn.pdf'},
+  ],
+  'ig-addmaths': [
+    {icon:'𝑓',title:'Functions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Vxyt2zGfzCB4ShWg.pdf'},
+    {icon:'🔼',title:'Quadratic Functions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/CsTvfJxCzKwCrfw4.pdf'},
+    {icon:'🧩',title:'Factors of Polynomials',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FYdgV8QPD4kg3tT7.pdf'},
+    {icon:'📈',title:'Equations, Inequalities & Graphs',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9v8vmDDmNTMrm6b3.pdf'},
+    {icon:'🔀',title:'Simultaneous Equations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FdYx8Qbp8NRF4pSK.pdf'},
+    {icon:'📉',title:'Logarithmic & Exponential Functions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kbWbxMh3dpZ2n6b8.pdf'},
+    {icon:'📏',title:'Straight-Line Graphs',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Vgvtkr9f6vTjxQzt.pdf'},
+    {icon:'⭕',title:'Coordinate Geometry of the Circle',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/M47tsYbRGgJFZXBY.pdf'},
+    {icon:'🔵',title:'Circular Measure',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/TJVGr3jRh3YkqyZ3.pdf'},
+    {icon:'📐',title:'Trigonometry',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/99ScSJv2KBjWFGhf.pdf'},
+    {icon:'🎲',title:'Permutations & Combinations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Qdwx6tszxMsKYm6f.pdf'},
+    {icon:'🔢',title:'Binomial Theorem',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/r6QCCmR6sZgDt5cC.pdf'},
+    {icon:'🔢',title:'Arithmetic & Geometric Progressions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZbsShy99GvnMB5nS.pdf'},
+    {icon:'➡️',title:'Vectors in Two Dimensions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Qxv9Qtfp8rF362xP.pdf'},
+    {icon:'∂',title:'Differentiation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2XJ3fKYXs5pJQW7y.pdf'},
+    {icon:'∫',title:'Integration',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/vwzF2yrrxkbgPpm7.pdf'},
+    {icon:'🚀',title:'Calculus for Kinematics',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8QCfV6r98XCY3Wn5.pdf'},
+  ],
+  'ig-economics': [
+    {icon:'🌍',title:'The Nature of the Basic Economic Problem',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/jW3mhC9bX4sK3pJJ.pdf'},
+    {icon:'🏭',title:'Factors of Production',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NNMcpxszg3nM44Hp.pdf'},
+    {icon:'💡',title:'Opportunity Cost',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9XJzr2MTrW37Z9Pt.pdf'},
+    {icon:'📈',title:'Production Possibility Curve (PPC) Diagrams',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/v9QjvDYCXFF8jxVV.pdf'},
+    {icon:'🏪',title:'The Role of Markets in Allocating Resources',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/rf4sDvfcyJ3mykHF.pdf'},
+    {icon:'📉',title:'Demand',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/btxHdQfbbmX3fSYd.pdf'},
+    {icon:'📦',title:'Supply',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/fS8pv3JRhN9JnTR8.pdf'},
+    {icon:'⚖️',title:'Price Determination',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/mYbqbCTGc7Tm6hc2.pdf'},
+    {icon:'🔄',title:'Price Changes',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/d62XDgzTJ6JPdbtw.pdf'},
+    {icon:'📊',title:'Price Elasticity of Demand (PED)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6t8MQtq4ggvd2JFs.pdf'},
+    {icon:'📊',title:'Price Elasticity of Supply (PES)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/yqmDBPFRbp6zr2fr.pdf'},
+    {icon:'🏦',title:'Market Economic System',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/t6rwFxdZWm2QhKDg.pdf'},
+    {icon:'⚠️',title:'Market Failure',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/cwHwwsW42KZvPBGY.pdf'},
+    {icon:'🔀',title:'Mixed Economic System',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/vHWbqr2px9XNNxQm.pdf'},
+    {icon:'💰',title:'Money & Banking',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/yvzKcHhYFB844r7w.pdf'},
+    {icon:'🏠',title:'Households',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NhzqFcb2S4HhmZzD.pdf'},
+    {icon:'👷',title:'Workers',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KZZFhc68Hw2VcZXS.pdf'},
+    {icon:'🏢',title:'Firms',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/5wXBbgJ8NBB7q5gb.pdf'},
+    {icon:'🏭',title:'Firms & Production',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/WwtdcHzZ7thCGwrs.pdf'},
+    {icon:'💹',title:'Firms Costs, Revenue & Objectives',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZntZQt7sKMR5sbsZ.pdf'},
+    {icon:'🏪',title:'Types of Markets',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GYRnBTWStRqNfK9R.pdf'},
+    {icon:'🏛️',title:'Government Macroeconomic Intervention',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FYz4JCf4nKnFWGPG.pdf'},
+    {icon:'💸',title:'Fiscal Policy',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NnBfqSxrFwFRFSs7.pdf'},
+    {icon:'🏦',title:'Monetary Policy',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/hdw4ZW8gQtffqp7c.pdf'},
+    {icon:'⚙️',title:'Supply-Side Policy',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/wDr9zTBXXrMT7Wdk.pdf'},
+    {icon:'📈',title:'Economic Growth',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/r6JPnCGZJPYJxJf5.pdf'},
+    {icon:'👥',title:'Employment & Unemployment',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GBcVqmqvxfqVSRS2.pdf'},
+    {icon:'💲',title:'Inflation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/RsBfQtw5bnkHMxsJ.pdf'},
+    {icon:'🌟',title:'Living Standards',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/jpV3rWXnHgT4SxNY.pdf'},
+    {icon:'😔',title:'Poverty',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qqk3Dyr73Bpj7xCx.pdf'},
+    {icon:'👨‍👩‍👧‍👦',title:'Population',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xKvxr4WB9BZGhQ4H.pdf'},
+    {icon:'🌐',title:'Differences in Economic Development Between Countries',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/cd4gbG8gH6gZHVJx.pdf'},
+    {icon:'🚢',title:'Specialisation & Free Trade',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KRx6tggWZQqzrwXB.pdf'},
+    {icon:'🌍',title:'Globalisation & Trade Restrictions',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/CzPx3xFTmjr6pfrM.pdf'},
+    {icon:'💱',title:'Foreign Exchange Rates',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/skr5Wh455k3vvDYf.pdf'},
+    {icon:'📋',title:'Current Account of the Balance of Payments',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FyzkMPQJnHb9WZF6.pdf'},
+    {icon:'📝',title:'The Exam Papers',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/QK222Tf8gbR37jPj.pdf'},
+    {icon:'🎯',title:'Economics Exam Skills',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/cr5h7Bdh93nSDsDs.pdf'},
+    {icon:'✍️',title:'Structuring Your Responses',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/JzJCbZGsmbW45gQb.pdf'},
+  ],
+  'ig-accounting': [
+    {icon:'📘',title:'The Purpose of Accounting & The Accounting Equation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/rMvwJ6KCCphGHzWQ.pdf'},
+    {icon:'🏢',title:'Types of Business & Sources of Finance',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8D4SDQ8CrTTcKhXm.pdf'},
+    {icon:'📄',title:'Business Documents & Books of Prime Entry',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2DRttGBbkxB7G4Kp.pdf'},
+    {icon:'📒',title:'Double Entry Book-Keeping with Ledger Accounts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qVfHxZNrChBNnq9P.pdf'},
+    {icon:'💵',title:'The Cash & Petty Cash Books',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ktFBQjvSKmqSSCm9.pdf'},
+    {icon:'⚖️',title:'The Trial Balance & Correction of Errors',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/cpqQJHjNFWrh2b5N.pdf'},
+    {icon:'🏦',title:'Bank Reconciliation',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Z22H27szrzGFZDSF.pdf'},
+    {icon:'🗂️',title:'Control Accounts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/zkkSTXwgDnrKF2Nf.pdf'},
+    {icon:'💸',title:'Capital & Revenue Expenditure & Receipts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/VDz3KNzv3vrBqGS6.pdf'},
+    {icon:'📉',title:'Depreciation & Disposal of Non-Current Assets',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/H4NP95qFCp46zqQD.pdf'},
+    {icon:'📋',title:'Other Payables & Other Receivables',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2rx55fn4YVkSGsQG.pdf'},
+    {icon:'❌',title:'Irrecoverable Debts & Allowance for Irrecoverable Debts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/T9tj5BZJ859HrmnR.pdf'},
+    {icon:'📦',title:'Valuation of Inventory',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/cYyprS8hhTyZSdzX.pdf'},
+    {icon:'📊',title:'Financial Statements for Sole Traders',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/QNJT3jrbJNR2dKt3.pdf'},
+    {icon:'🤝',title:'Financial Statements for Partnerships',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NjWDjJ6JzykyR9zm.pdf'},
+    {icon:'🏭',title:'Financial Statements for Limited Companies',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/BzKq5QVs44VF5r57.pdf'},
+    {icon:'🎽',title:'Financial Statements for Clubs & Societies',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/FtGXv7PGnbYSJ2dT.pdf'},
+    {icon:'🏗️',title:'Financial Statements for Manufacturing Businesses',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/vvj3XFxDdHwVn9RZ.pdf'},
+    {icon:'🧩',title:'Incomplete Records',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9rCrwYvP7CP7DcBX.pdf'},
+    {icon:'📐',title:'Accounting Ratios',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/gyf3YCvtZdcQcypN.pdf'},
+    {icon:'💡',title:'Accounting Concepts',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qm5FpmZqkCSzrf3H.pdf'},
+    {icon:'🌿',title:'Ethical Considerations, Technology & Sustainability',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KzNpbqpkp45Ndsys.pdf'},
+  ],
+  'ig-history': [
+    {icon:'📜',title:'Was the Treaty of Versailles Fair?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/xcWT7VPw3S7pJKZk.pdf'},
+    {icon:'🕊️',title:'To What Extent was the League of Nations a Success?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/DGqN8JXGnNQdyy5b.pdf'},
+    {icon:'⚔️',title:"Was Hitler's Foreign Policy to Blame for the Second World War?",tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6DRN4Y8Th3WFbfKr.pdf'},
+    {icon:'🥶',title:'Who was to Blame for the Cold War?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/GRY4M5hDdXmGbsc3.pdf'},
+    {icon:'🌎',title:'Did the United States Contain the Spread of Communism?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8BGQrF5KFYk5ZgXR.pdf'},
+    {icon:'🛡️',title:"How Secure was the USSR's Control over Eastern Europe, 1948–c.1989?",tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qgz8dFccHpTg96Tc.pdf'},
+    {icon:'🇩🇪',title:'Was the Weimar Republic Doomed From the Start?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/8zgKYfMMb66jtFx9.pdf'},
+    {icon:'👊',title:'Why was Hitler Able to Dominate Germany by 1934?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/zJc9Xz2p7ntd7n6t.pdf'},
+    {icon:'🔍',title:'How Effectively Did the Nazis Control Germany, 1933–45?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/mtn2QMy9fwmf5B3F.pdf'},
+    {icon:'🏘️',title:'What was it Like to Live in Nazi Germany?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/TsyNZc4Jmtz8cn5J.pdf'},
+    {icon:'👑',title:'Why Did the Tsarist Regime Collapse in 1917?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qZTHDXnqN75rPvxz.pdf'},
+    {icon:'🚩',title:'How Did the Bolsheviks Gain & Consolidate Their Rule?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6mRFjGNNxvCNRHHV.pdf'},
+    {icon:'⭐',title:'How Did Stalin Gain & Hold onto Power?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Yb7WNfx6WSWr5t7M.pdf'},
+    {icon:'🏭',title:"What was the Impact of Stalin's Economic Policies?",tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/XCjgv7Bmd4r7tgYc.pdf'},
+    {icon:'💰',title:'How Far Did the US Economy Boom in the 1920s?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/dGKpTp4RKtmN2x4w.pdf'},
+    {icon:'🎷',title:'How Far Did US Society Change in the 1920s?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZB6YRrkwTt4tMYvG.pdf'},
+    {icon:'📉',title:'What were the Causes & Consequences of the Wall Street Crash?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/jTttyQ83xFpdgBKF.pdf'},
+    {icon:'🤝',title:'How Successful was the New Deal?',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/cjv7cbG4fr67Rn4Z.pdf'},
+  ],
+  'ig-ict': [
+    {icon:'💻',title:'Hardware & Software',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/krFBHpH4CNR6Zgtx.pdf'},
+    {icon:'🖥️',title:'Components of Computer Systems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Vm3bKQkGY6zf7Cxk.pdf'},
+    {icon:'📱',title:'Types of Computer & Emerging Technologies',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/DcZ9gCYKfddMQpkY.pdf'},
+    {icon:'🌐',title:'Networks',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Df3827nFYfw7KNbM.pdf'},
+    {icon:'⚠️',title:'Network Issues',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NrWCGddp3RTxKB5S.pdf'},
+    {icon:'🧑‍💻',title:'Effects of Using IT',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nwqVbdR47tQx6fbF.pdf'},
+    {icon:'📲',title:'ICT Applications',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qxJynJGNdF2kGtVC.pdf'},
+    {icon:'🔄',title:'The Systems Life Cycle',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ZtZvph4MPwStWDm5.pdf'},
+    {icon:'🦺',title:'Safety',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/6yBCP2h3vzdFtDVM.pdf'},
+    {icon:'🔒',title:'Security',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/9G9fRZRk8CYfDYwh.pdf'},
+    {icon:'💬',title:'Communication',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/P4483pysrfHHH4vH.pdf'},
+    {icon:'📁',title:'Manage Files Effectively',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/mpWmqWMMGKqn9gvD.pdf'},
+    {icon:'🗜️',title:'Compression',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/HdJn4yt3vGMGzJmg.pdf'},
+    {icon:'🎯',title:'Audience & Purpose',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/DWJCcs7PyGg453xk.pdf'},
+    {icon:'📄',title:'Document Production',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/j6tzZ4BKVGsrtNdK.pdf'},
+    {icon:'🖼️',title:'Images',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2xXmCK5mkYjyrRTj.pdf'},
+    {icon:'✅',title:'Proofing',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/23pfvPRdGk596rjh.pdf'},
+    {icon:'🗄️',title:'Create a Database Structure',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/2v7KzQxJ7ndWZqTj.pdf'},
+    {icon:'📊',title:'Create a Data Model',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/S5r7kwGS9vJpr5t6.pdf'},
+    {icon:'🌍',title:'Web Development Layers',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/Ppq8c22JRg2fWpHd.pdf'},
+    {icon:'🏷️',title:'HTML in the Content Layer',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/HFqmGdK8gMJPzfyN.pdf'},
+    {icon:'🎨',title:'CSS in the Presentation Layer (Part 1)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/bjgsFDf54HC4Ynyt.pdf'},
+    {icon:'🎨',title:'CSS in the Presentation Layer (Part 2)',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/rZ6wgVFt6mgK2hjg.pdf'},
+  ],
+  'ig-envman': [
+    {icon:'🪨',title:'Formation of Rocks',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/X6kzBY7zVSdTVv4w.pdf'},
+    {icon:'⛏️',title:'Extraction of Rocks, Ores & Minerals',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/k2fVhMZK2D2qVySr.pdf'},
+    {icon:'♻️',title:'Sustainable Management of Rocks, Ores & Minerals',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/h72qzrCtsbfkc9jT.pdf'},
+    {icon:'⚡',title:'Energy Resources',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/M5m6WrrBMvzCmxHK.pdf'},
+    {icon:'🌱',title:'Conservation & Management of Energy Resources',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/XctcFfxgH4XXSPxH.pdf'},
+    {icon:'💧',title:'Fracking',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/HWXyyRh4SWwhnMT4.pdf'},
+    {icon:'🌾',title:'Soils & Crop Growth',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/ztmVXTsk7PNRYQyw.pdf'},
+    {icon:'🍎',title:'Food Production & Crop Yield',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/wfHBSqSYvh3XbN3K.pdf'},
+    {icon:'🏜️',title:'Soil Erosion',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/mFqVwZDQXTVjznt8.pdf'},
+    {icon:'🚰',title:'Water Sources & Supply',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/PNhMk4PVkq8gvR92.pdf'},
+    {icon:'🌊',title:'Water Pollution',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/kDRQmJZfFwVWQxQh.pdf'},
+    {icon:'🦟',title:'Water-Related Diseases',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/fMNFKXZND2v5hFWR.pdf'},
+    {icon:'🐟',title:'Marine Aquaculture',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/y3Np9XK7Zz6v56yH.pdf'},
+    {icon:'🛢️',title:'Oil Pollution',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/t5QMDqMtgzfPdrr8.pdf'},
+    {icon:'🧴',title:'Plastic Pollution',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nv7ZZXRBMbX7MHVp.pdf'},
+    {icon:'🌫️',title:'The Atmosphere',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/5rSQP6PCswMzhPTz.pdf'},
+    {icon:'🌡️',title:'Climate Change',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/THNcW5CyTWn2tf2b.pdf'},
+    {icon:'🌧️',title:'Acid Rain',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/jBtP9h9RVmgDDQ8n.pdf'},
+    {icon:'☀️',title:'Ozone Depletion',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/gQYHycp4SrkzrPBR.pdf'},
+    {icon:'🌿',title:'Ecosystems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/KmKgpp3qK3y95NWm.pdf'},
+    {icon:'🌳',title:'Forest Ecosystems',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/NtYKckfn7bfJYcVv.pdf'},
+    {icon:'🦁',title:'Managing Biodiversity',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/zpM7VDSz6XV7VCqw.pdf'},
+    {icon:'🔭',title:'Fieldwork Investigations',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/r5Zb4SdrYQH6T3Y4.pdf'},
+    {icon:'🌋',title:'Earthquakes & Volcanoes',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/BgzY9VcsVk5sy74V.pdf'},
+    {icon:'🌀',title:'Tropical Cyclones',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/pPSt3K56J9K8QMkQ.pdf'},
+    {icon:'🌊',title:'Flooding',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/nVHd4FJ3GHs45FJ5.pdf'},
+    {icon:'☀️',title:'Drought',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/qhJXnbZfHS6kvypc.pdf'},
+    {icon:'👥',title:'Human Population Density, Distribution & Structure',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/b3vTqQ8zc8VNNbM9.pdf'},
+    {icon:'📊',title:'Human Population Size',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/zYGzgBqJrJ6ypqkG.pdf'},
+    {icon:'🗺️',title:'Managing Human Population Size',tag:'Save My Exams',url:'https://cdn.savemyexams.com/pdfs/bDd4gRQdpfypWnxg.pdf'},
+  ],
+};
+
+function getNotesFor(id){
+  if(SUBJECT_NOTES[id]) return SUBJECT_NOTES[id];
+  // fallback for subjects not yet mapped
+  return [
+    {icon:'📖',title:'Concise Revision Notes',desc:'Topic-by-topic condensed notes covering the full syllabus.',tag:'Save My Exams',url:'https://www.savemyexams.com'},
+    {icon:'📋',title:'Detailed Study Guide',desc:'Comprehensive explanations with worked examples and diagrams.',tag:'PapaCambridge',url:'https://papacambridge.com'},
+    {icon:'✅',title:'Exam Tips & Techniques',desc:'Key exam strategies and common mistakes to avoid.',tag:'Save My Exams',url:'https://www.savemyexams.com'},
+  ];
+}
+function getPapersFor(id,curr){
+  const years=[2024,2023,2022,2021,2020];
+  const variants=['Paper 1','Paper 2','Paper 3'];
+  const papers=[];
+  years.forEach(y=>{
+    variants.slice(0,2).forEach(v=>{
+      papers.push({title:`${y} ${v} – Question Paper`,detail:`${curr} | ${y} | ${v}`,curr,url:'https://papacambridge.com',ms:true});
+    });
+  });
+  return papers.slice(0,8);
+}
+function getFlashcardsFor(id){
+  const decks={
+    maths:[
+      {q:'What is the quadratic formula?',a:'x = (−b ± √(b²−4ac)) / 2a'},
+      {q:'State the Pythagorean theorem.',a:'a² + b² = c², where c is the hypotenuse'},
+      {q:'What is the gradient formula?',a:'m = (y₂−y₁) / (x₂−x₁)'},
+      {q:'Differentiate xⁿ with respect to x.',a:'nxⁿ⁻¹ (Power Rule)'},
+      {q:'What is the area of a circle?',a:'A = πr²'},
+    ],
+    biology:[
+      {q:'Define osmosis.',a:'Movement of water molecules from a region of high water potential to low water potential through a semi-permeable membrane.'},
+      {q:'What is ATP?',a:'Adenosine Triphosphate – the primary energy currency of the cell.'},
+      {q:'State the stages of mitosis.',a:'Prophase → Metaphase → Anaphase → Telophase (PMAT)'},
+      {q:'What is the function of the ribosome?',a:'Protein synthesis – translating mRNA into polypeptide chains.'},
+    ],
+    chemistry:[
+      {q:'What is the mole?',a:'The amount of substance containing 6.022 × 10²³ particles (Avogadro\'s constant).'},
+      {q:'Define oxidation in terms of electrons.',a:'Oxidation is the loss of electrons (OIL – Oxidation Is Loss).'},
+      {q:'What is Le Chatelier\'s Principle?',a:'If a system at equilibrium is disturbed, it shifts to oppose the disturbance.'},
+      {q:'State the ideal gas equation.',a:'PV = nRT'},
+    ],
+    physics:[
+      {q:'State Newton\'s Second Law.',a:'F = ma — Force equals mass times acceleration.'},
+      {q:'What is the wave equation?',a:'v = fλ (wave speed = frequency × wavelength)'},
+      {q:'Define electric current.',a:'Rate of flow of charge: I = Q/t'},
+      {q:'State Ohm\'s Law.',a:'V = IR (Voltage = Current × Resistance)'},
+    ],
+  };
+  const key=Object.keys(decks).find(k=>id.toLowerCase().includes(k));
+  return decks[key]||[{q:'What is this subject about?',a:'A fascinating field of study with many key concepts to explore!'},{q:'How should I study?',a:'Use active recall, spaced repetition, and past papers for best results.'}];
+}
+
+// Resources
+function getResourcesFor(id,curr){
+  return [
+    {icon:'🌐',title:'Official Syllabus',desc:`Latest ${curr} syllabus and specimen papers from the examination board.`,tag:'Official',url:`https://www.cambridgeinternational.org`},
+    {icon:'📹',title:'Video Lessons',desc:'Free video explanations on YouTube by experienced teachers.',tag:'YouTube',url:`https://youtube.com/results?search_query=${encodeURIComponent(curr+' '+id+' revision')}`},
+    {icon:'🃏',title:'Interactive Quizzes',desc:'Test your knowledge with topic-specific MCQ quizzes.',tag:'Quizlet',url:`https://quizlet.com/search?query=${encodeURIComponent(id)}`},
+    {icon:'💬',title:'Study Community',desc:'Join thousands of students discussing this subject on Reddit.',tag:'Reddit',url:`https://reddit.com/r/alevel`},
+  ];
+}
+
+// ══════════════════════════════════
+// AUTH SYSTEM (Google Sign-In)
+// ══════════════════════════════════
+let currentUser=null;
+const GOOGLE_CLIENT_ID='23393173948-epafq77gico005ib5algg940hk2980qb.apps.googleusercontent.com';
+
+function getDB(){return JSON.parse(localStorage.getItem('reilm_db')||'{"users":{}}');}
+function saveDB(db){localStorage.setItem('reilm_db',JSON.stringify(db));}
+function getUserData(u){const db=getDB();return db.users[u]||null;}
+function saveUserData(u,data){const db=getDB();db.users[u]=data;saveDB(db);}
+
+function signInWithGoogle(){
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:GOOGLE_CLIENT_ID,
+    scope:'email profile',
+    callback:(tokenResponse)=>{
+      if(tokenResponse.error){
+        document.getElementById('authMsg').className='auth-msg error';
+        document.getElementById('authMsg').textContent='Sign-in failed. Please try again.';
+        return;
+      }
+      // Fetch user info from Google
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
+        headers:{Authorization:'Bearer '+tokenResponse.access_token}
+      }).then(r=>r.json()).then(profile=>{
+        handleGoogleProfile(profile);
+      }).catch(()=>{
+        document.getElementById('authMsg').className='auth-msg error';
+        document.getElementById('authMsg').textContent='Could not fetch profile. Check network.';
+      });
+    }
+  });
+  client.requestAccessToken();
+}
+
+function showAuthOverlay(){
+  document.getElementById('authMsg').textContent='';
+  document.getElementById('authOverlay').style.display='flex';
+}
+
+function closeAuthOverlay(e){
+  if(!e||e.target===document.getElementById('authOverlay')||e.target.tagName==='BUTTON'){
+    document.getElementById('authOverlay').style.display='none';
+  }
+}
+
+function handleGoogleProfile(profile){
+  const uid='g_'+profile.sub;
+  const db=getDB();
+  if(!db.users[uid]){
+    db.users[uid]={
+      googleId:profile.sub,
+      name:profile.name||profile.email,
+      email:profile.email,
+      picture:profile.picture||'',
+      subjects:[],activity:[],studyTime:{},docsViewed:0,streak:0,lastLogin:''
+    };
+    saveDB(db);
+  }
+  currentUser=uid;
+  document.getElementById('authMsg').className='auth-msg success';
+  document.getElementById('authMsg').textContent='Welcome, '+profile.name+'! 🌟';
+  setTimeout(launchApp,600);
+}
+
+function doLogout(){
+  currentUser=null;
+  document.body.className='guest';
+  document.getElementById('authMsg').textContent='';
+  showToast('👋 Logged out successfully','success');
+}
+
+function launchApp(){
+  document.getElementById('authOverlay').style.display='none';
+  document.body.className='loggedin';
+  const ud=getUserData(currentUser);
+  // Update streak
+  const today=new Date().toDateString();
+  const streak=(ud.lastLogin===new Date(Date.now()-86400000).toDateString()||ud.lastLogin===today)?(ud.streak||1):1;
+  ud.streak=streak;ud.lastLogin=today;
+  saveUserData(currentUser,ud);
+  // UI - avatar
+  const avatarEl=document.getElementById('userAvatar');
+  if(ud.picture){
+    avatarEl.style.background='none';
+    avatarEl.innerHTML=`<img src="${ud.picture}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${ud.name.charAt(0).toUpperCase()}'">`;
+  } else {
+    avatarEl.textContent=ud.name.charAt(0).toUpperCase();
+  }
+  document.getElementById('userNameDisplay').textContent=ud.name.split(' ')[0];
+  buildSidebar();
+  renderHomePage();
+  renderNotesPage();
+  renderPPPage();
+  renderFCDecks();
+  renderPersonalPage();
+  renderFAQ();
+  showPage('home');
+}
+
+// ══════════════════════════════════
+// SIDEBAR BUILD
+// ══════════════════════════════════
+function buildSidebar(){
+  const subpages=[
+    {key:'notes',label:'📚 Notes',page:'notes'},
+    {key:'pastpapers',label:'📄 Past Papers',page:'pastpapers'},
+    {key:'flashcards',label:'🃏 Flashcards',page:'flashcards'},
+  ];
+
+  Object.entries(CURRICULA).forEach(([key,curr])=>{
+    const el=document.getElementById(key+'-subs');
+    if(!el)return;
+    el.innerHTML='';
+
+    subpages.forEach(sp=>{
+      // Subpage header (Notes / Past Papers / Flashcards)
+      const spH=document.createElement('div');
+      spH.className='curr-subpage';
+      spH.id=`sp-${key}-${sp.key}`;
+      spH.innerHTML=`<span>${sp.label}</span><span class="curr-subpage-toggle">▸</span>`;
+
+      // Subjects container
+      const spI=document.createElement('div');
+      spI.className='curr-subpage-subjects';
+      spI.id=`sp-${key}-${sp.key}-items`;
+
+      curr.subjects.forEach(s=>{
+        const item=document.createElement('div');
+        item.className='curr-subpage-item';
+        item.textContent=s.name;
+        item.dataset.id=s.id;
+        item.dataset.curr=curr.label;
+        item.dataset.name=s.name;
+        item.dataset.subpage=sp.key;
+        item.addEventListener('click',()=>{
+          openSubjectWithTab(s.id,curr.label,s.name,sp.key);
+        });
+        spI.appendChild(item);
+      });
+
+      spH.addEventListener('click',()=>{
+        const isOpen=spI.classList.toggle('open');
+        spH.classList.toggle('open',isOpen);
+      });
+
+      el.appendChild(spH);
+      el.appendChild(spI);
+    });
+  });
+}
+
+function toggleCurr(key){
+  const subs=document.getElementById(key+'-subs');
+  const headers=document.querySelectorAll('.curr-header');
+  let found=null;
+  headers.forEach(h=>{if(h.getAttribute('onclick')&&h.getAttribute('onclick').includes("'"+key+"'"))found=h;});
+  if(subs){
+    const open=subs.classList.toggle('open');
+    if(found)found.classList.toggle('open',open);
+  }
+}
+
+// ══════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════
+let sidebarOpen=false;
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  sidebarOpen=!sidebarOpen;
+  sb.classList.toggle('open',sidebarOpen);
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);
+  if(pg)pg.classList.add('active');
+  const ni=document.querySelector(`.nav-item[data-page="${name}"]`);
+  if(ni)ni.classList.add('active');
+  if(window.innerWidth<=900&&sidebarOpen){
+    sidebarOpen=false;document.getElementById('sidebar').classList.remove('open');
+  }
+  if(name==='personal')renderPersonalPage();
+}
+
+function switchTab(tabId,tabsContainer){
+  const container=document.getElementById(tabsContainer)||document.querySelector('.page-tabs');
+  container.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  // find clicked tab
+  event.target.classList.add('active');
+  // hide all panels in parent
+  const parent=container.parentElement;
+  parent.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  const panel=document.getElementById(tabId);
+  if(panel)panel.classList.add('active');
+}
+
+// ══════════════════════════════════
+// SUBJECT PAGE
+// ══════════════════════════════════
+let currentSubjectId=null,currentFlashCards=[],fcIndex=0,fcFlipped=false;
+
+function openSubjectWithTab(id,curr,name,tabKey){
+  // Map tabKey to tab index
+  const tabMap={notes:0,pastpapers:1,flashcards:2,resources:3};
+  const tabIdx=tabMap[tabKey]!==undefined?tabMap[tabKey]:0;
+  openSubject(id,curr,name,tabIdx);
+}
+
+function openSubject(id,curr,name,initialTab){
+  currentSubjectId=id;
+
+  // Subject-specific overlay colours
+  const SUBJ_COLORS={
+    maths:'rgba(0,100,255,0.55),rgba(0,229,255,0.25)',
+    addmaths:'rgba(0,80,200,0.55),rgba(0,180,255,0.25)',
+    physics:'rgba(80,0,200,0.55),rgba(180,0,255,0.25)',
+    chemistry:'rgba(0,160,120,0.55),rgba(0,229,180,0.25)',
+    biology:'rgba(20,140,60,0.55),rgba(0,220,100,0.25)',
+    computer:'rgba(20,20,80,0.65),rgba(0,229,255,0.3)',
+    ict:'rgba(0,60,120,0.6),rgba(0,180,255,0.25)',
+    business:'rgba(100,60,0,0.6),rgba(255,160,0,0.25)',
+    economics:'rgba(120,0,60,0.55),rgba(255,100,100,0.25)',
+    accounting:'rgba(40,80,40,0.6),rgba(100,200,100,0.25)',
+    history:'rgba(80,40,0,0.65),rgba(200,140,60,0.3)',
+    envman:'rgba(0,80,40,0.6),rgba(0,200,100,0.25)',
+  };
+  const subjKey=id.split('-').slice(1).join('');
+  const colorPair=Object.entries(SUBJ_COLORS).find(([k])=>subjKey.includes(k));
+  const gradient=colorPair
+    ? `linear-gradient(to top, rgba(3,0,15,0.85) 0%, ${colorPair[1].split(',')[0].replace('rgba(','rgba(').replace(/[\d.]+\)$/,'0.3)')} 60%, transparent 100%)`
+    : 'linear-gradient(to top, rgba(3,0,15,0.85) 0%, rgba(180,0,255,0.25) 60%, transparent 100%)';
+  document.querySelector('.subj-page-overlay').style.background=gradient;
+
+  // Set hero image
+  document.getElementById('subjHeroTitle').textContent=name;
+  document.getElementById('subjHeroBadge').textContent=curr;
+  const heroEl=document.getElementById('subjHero');
+  const img=document.getElementById('subjHeroImg');
+
+  // Set gradient as immediate background (shows instantly while image loads)
+  const fallbackGrad=colorPair
+    ? `linear-gradient(135deg,${colorPair[1].replace('0.55','0.8').replace('0.25','0.5')})`
+    : 'linear-gradient(135deg,rgba(0,80,180,0.9),rgba(0,180,200,0.7))';
+  heroEl.style.background=fallbackGrad;
+
+  // Reset img state
+  img.classList.remove('loaded');
+  img.style.display='block';
+  img.src='';
+
+  // Load the image — show it once loaded
+  const imgUrl=getImage(id);
+  const preload=new Image();
+  preload.crossOrigin='anonymous';
+  preload.onload=()=>{
+    img.src=imgUrl;
+    // Short delay so transition fires properly
+    requestAnimationFrame(()=>requestAnimationFrame(()=>img.classList.add('loaded')));
+  };
+  preload.onerror=()=>{
+    // Keep the gradient fallback — hide img
+    img.style.display='none';
+  };
+  preload.src=imgUrl;
+
+  // Reset tabs, then switch to requested tab
+  const tabIdx=initialTab||0;
+  document.querySelectorAll('#subjTabs .page-tab').forEach((t,i)=>t.classList.toggle('active',i===tabIdx));
+  document.querySelectorAll('#page-subject .tab-panel').forEach((p,i)=>p.classList.toggle('active',i===tabIdx));
+
+  // Notes
+  const notes=getNotesFor(id);
+  document.getElementById('subj-notes-grid').innerHTML=notes.map(n=>`
+    <div class="resource-card" onclick="trackDoc('${n.title}','${name}')">
+      <div class="rc-icon">${n.icon}</div>
+      <div class="rc-title">${n.title}</div>
+      <div class="rc-desc">${n.desc||''}</div>
+      <span class="rc-tag">${n.tag}</span><br>
+      <a href="${n.url}" target="_blank" class="rc-btn" onclick="event.stopPropagation()">Open Resource ↗</a>
+    </div>`).join('');
+
+  // Papers
+  const papers=getPapersFor(id,curr);
+  document.getElementById('subj-pp-filters').innerHTML=
+    ['All','2024','2023','2022','2021','2020'].map(y=>`<div class="pp-filter${y==='All'?' active':''}" onclick="filterSubjPP('${y}',this)">${y}</div>`).join('');
+  renderSubjPP(papers,'all');
+
+  // Flashcards
+  currentFlashCards=getFlashcardsFor(id);
+  fcIndex=0;fcFlipped=false;
+  renderFlashcard();
+
+  // Resources
+  const res=getResourcesFor(id,curr);
+  document.getElementById('subj-resources-grid').innerHTML=res.map(r=>`
+    <div class="resource-card">
+      <div class="rc-icon">${r.icon}</div>
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-desc">${r.desc}</div>
+      <span class="rc-tag">${r.tag}</span><br>
+      <a href="${r.url}" target="_blank" class="rc-btn">Visit ↗</a>
+    </div>`).join('');
+
+  // Sidebar active
+  document.querySelectorAll('.curr-subpage-item').forEach(s=>s.classList.toggle('active',s.dataset.id===id));
+
+  // Track activity
+  logActivity('📖',`Opened ${name}`);
+  startStudyTimer(name);
+  showPage('subject');
+}
+
+let studyTimer=null,studySubject=null,studyStart=null;
+function startStudyTimer(name){
+  if(!currentUser)return;
+  if(studyTimer)clearInterval(studyTimer);
+  studySubject=name;studyStart=Date.now();
+  studyTimer=setInterval(()=>{
+    const mins=Math.round((Date.now()-studyStart)/60000);
+    if(mins>=1){
+      const ud=getUserData(currentUser);
+      ud.studyTime=ud.studyTime||{};
+      ud.studyTime[studySubject]=(ud.studyTime[studySubject]||0)+1;
+      saveUserData(currentUser,ud);
+      studyStart=Date.now();
+    }
+  },60000);
+}
+
+function renderSubjPP(papers,filter){
+  document.getElementById('subj-pp-list').innerHTML=papers.filter(p=>filter==='all'||p.detail.includes(filter)).map(p=>`
+    <div class="pp-item">
+      <div class="pp-info">
+        <div class="pp-title">${p.title}</div>
+        <div class="pp-detail">${p.detail}</div>
+      </div>
+      <div class="pp-actions">
+        <a href="${p.url}" target="_blank" class="btn-ghost" style="font-size:.75rem;padding:.4rem .8rem;" onclick="trackDoc('${p.title}','${p.curr}')">Download ↓</a>
+        ${p.ms?`<a href="${p.url}" target="_blank" class="btn-primary" style="font-size:.75rem;padding:.4rem .8rem;">Mark Scheme</a>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function filterSubjPP(y,el){
+  document.querySelectorAll('#subj-pp-filters .pp-filter').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+  const papers=getPapersFor(currentSubjectId,'');
+  renderSubjPP(papers,y==='All'?'all':y);
+}
+
+// ══════════════════════════════════
+// FLASHCARDS
+// ══════════════════════════════════
+function renderFlashcard(){
+  const card=currentFlashCards[fcIndex];
+  document.getElementById('fcQuestion').textContent=card.q;
+  document.getElementById('fcAnswer').textContent=card.a;
+  document.getElementById('fcProgress').textContent=`Card ${fcIndex+1} of ${currentFlashCards.length}`;
+  const fc=document.getElementById('flashcard');
+  fc.classList.remove('flipped');fcFlipped=false;
+}
+function flipCard(){
+  fcFlipped=!fcFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped',fcFlipped);
+}
+function nextCard(){
+  fcIndex=(fcIndex+1)%currentFlashCards.length;
+  renderFlashcard();
+}
+function prevCard(){
+  fcIndex=(fcIndex-1+currentFlashCards.length)%currentFlashCards.length;
+  renderFlashcard();
+}
+
+// ══════════════════════════════════
+// HOME PAGE
+// ══════════════════════════════════
+function renderHomePage(){
+  if(!currentUser){
+    // Guest view
+    document.getElementById('statSubjects').textContent='—';
+    document.getElementById('statHours').textContent='—';
+    document.getElementById('statDocs').textContent='—';
+    document.getElementById('statStreak').textContent='—';
+    document.getElementById('mySubjectsGrid').innerHTML=`
+      <div class="empty-subjects">
+        <div style="font-size:3rem;margin-bottom:1rem;">🌌</div>
+        <div>Sign in to track your subjects and study progress.</div>
+        <button class="add-subjects-btn" style="margin:1rem auto 0;display:flex;" onclick="showAuthOverlay()">Sign In with Google</button>
+      </div>`;
+    return;
+  }
+  const ud=getUserData(currentUser);
+  const mins=Object.values(ud.studyTime||{}).reduce((a,b)=>a+b,0);
+  document.getElementById('statSubjects').textContent=ud.subjects.length;
+  document.getElementById('statHours').textContent=Math.round(mins/60*10)/10+'h';
+  document.getElementById('statDocs').textContent=ud.docsViewed||0;
+  document.getElementById('statStreak').textContent=(ud.streak||0)+'🔥';
+
+  const grid=document.getElementById('mySubjectsGrid');
+  if(!ud.subjects.length){
+    grid.innerHTML=`<div class="empty-subjects"><div style="font-size:3rem;margin-bottom:1rem;">🌌</div><div>No subjects added yet. Start exploring the cosmos!</div><button class="add-subjects-btn" style="margin:1rem auto 0;display:flex;" onclick="openAddSubjModal()">＋ Add Subjects</button></div>`;
+    return;
+  }
+  grid.innerHTML=ud.subjects.map((s,i)=>`
+    <div class="subj-card" style="animation-delay:${i*.07}s" onclick="openSubject('${s.id}','${s.curr}','${s.name}')">
+      <div class="subj-icon">${getIcon(s.id)}</div>
+      <div class="subj-name">${s.name}</div>
+      <div class="subj-curr">${s.curr}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// NOTES PAGE
+// ══════════════════════════════════
+let allNotes=[];
+function renderNotesPage(){
+  allNotes=[];
+  Object.entries(CURRICULA).forEach(([key,curr])=>{
+    curr.subjects.forEach(s=>{
+      if(s.levels){
+        s.levels.forEach(lv=>{
+          allNotes.push({id:s.id+'-'+lv.toLowerCase(),name:s.name+' '+lv,curr:curr.label,icon:getIcon(s.id)});
+        });
+      } else {
+        allNotes.push({id:s.id,name:s.name,curr:curr.label,icon:getIcon(s.id)});
+      }
+    });
+  });
+  renderNotesGrid(allNotes);
+}
+function renderNotesGrid(notes){
+  document.getElementById('notesGrid').innerHTML=notes.map(n=>`
+    <div class="note-card" onclick="openSubject('${n.id}','${n.curr}','${n.name}')">
+      <div class="note-thumb">${n.icon}</div>
+      <div class="note-body">
+        <div class="note-title">${n.name}</div>
+        <div class="note-meta">
+          <span class="note-badge">${n.curr}</span>
+          <span class="note-badge" style="background:rgba(180,0,255,.1);color:var(--accent2);border-color:rgba(180,0,255,.2);">Notes</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function filterNotes(){
+  const q=document.getElementById('notesSearch').value.toLowerCase();
+  const f=document.getElementById('notesCurrFilter').value;
+  const filtered=allNotes.filter(n=>
+    (!q||n.name.toLowerCase().includes(q)||n.curr.toLowerCase().includes(q))&&
+    (!f||n.curr===f)
+  );
+  renderNotesGrid(filtered);
+}
+
+// ══════════════════════════════════
+// PAST PAPERS PAGE
+// ══════════════════════════════════
+let allPapers=[];
+function renderPPPage(){
+  allPapers=[];
+  const years=[2024,2023,2022,2021,2020];
+  Object.entries(CURRICULA).forEach(([key,curr])=>{
+    curr.subjects.forEach(s=>{
+      const ids=s.levels?s.levels.map(l=>({id:s.id+'-'+l.toLowerCase(),name:s.name+' '+l})):[{id:s.id,name:s.name}];
+      ids.forEach(({id,name})=>{
+        years.slice(0,3).forEach(y=>{
+          allPapers.push({title:`${name} – ${y} Paper 1`,detail:`${curr.label} | ${y}`,curr:curr.label,url:'https://papacambridge.com'});
+          allPapers.push({title:`${name} – ${y} Paper 2`,detail:`${curr.label} | ${y}`,curr:curr.label,url:'https://papacambridge.com'});
+        });
+      });
+    });
+  });
+  renderPPList(allPapers);
+}
+function renderPPList(papers){
+  document.getElementById('ppList').innerHTML=papers.slice(0,40).map(p=>`
+    <div class="pp-item">
+      <div class="pp-info">
+        <div class="pp-title">${p.title}</div>
+        <div class="pp-detail">${p.detail}</div>
+      </div>
+      <div class="pp-actions">
+        <a href="${p.url}" target="_blank" class="btn-ghost" style="font-size:.75rem;padding:.4rem .8rem;" onclick="trackDoc('${p.title}','${p.curr}')">Download ↓</a>
+        <a href="${p.url}" target="_blank" class="btn-primary" style="font-size:.75rem;padding:.4rem .8rem;">Mark Scheme</a>
+      </div>
+    </div>`).join('');
+}
+function filterPP(curr,el){
+  document.querySelectorAll('#ppFilters .pp-filter').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+  renderPPList(curr==='all'?allPapers:allPapers.filter(p=>p.curr===curr));
+}
+
+// ══════════════════════════════════
+// FLASHCARD DECKS
+// ══════════════════════════════════
+function renderFCDecks(){
+  const decks=[
+    {id:'ig-maths',name:'IGCSE Math',curr:'IGCSE',icon:'🔢'},
+    {id:'ig-biology',name:'IGCSE Biology',curr:'IGCSE',icon:'🧬'},
+    {id:'ig-chemistry',name:'IGCSE Chemistry',curr:'IGCSE',icon:'⚗️'},
+    {id:'ig-physics',name:'IGCSE Physics',curr:'IGCSE',icon:'⚛️'},
+    {id:'ol-maths',name:'O Level Math',curr:'O Levels',icon:'🔢'},
+    {id:'ol-biology',name:'O Level Biology',curr:'O Levels',icon:'🧬'},
+    {id:'a-maths',name:'A Level Math',curr:'A Levels',icon:'📐'},
+    {id:'a-biology',name:'A Level Biology',curr:'A Levels',icon:'🧬'},
+    {id:'a-chemistry',name:'A Level Chemistry',curr:'A Levels',icon:'⚗️'},
+    {id:'a-physics',name:'A Level Physics',curr:'A Levels',icon:'⚛️'},
+  ];
+  document.getElementById('fcDecksGrid').innerHTML=decks.map((d,i)=>`
+    <div class="subj-card" style="animation-delay:${i*.07}s" onclick="openSubject('${d.id}','${d.curr}','${d.name}')">
+      <div class="subj-icon">${d.icon}</div>
+      <div class="subj-name">${d.name}</div>
+      <div class="subj-curr">${d.curr} • ${getFlashcardsFor(d.id).length} cards</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// PERSONAL DASHBOARD
+// ══════════════════════════════════
+let actChart=null,subjChartInst=null;
+function renderPersonalPage(){
+  if(!currentUser){
+    document.getElementById('personalTitle').textContent='My Dashboard';
+    document.getElementById('studySubjList').innerHTML=`<div style="color:var(--text2);font-size:.88rem;">Sign in to view your study stats.</div>`;
+    document.getElementById('activityLog').innerHTML=`<div style="color:var(--text2);font-size:.88rem;">Sign in to see your activity.</div>`;
+    document.getElementById('manageSubjGrid').innerHTML=`<div style="color:var(--text2);font-size:.85rem;"><button class="add-subjects-btn" onclick="showAuthOverlay()">Sign In to Add Subjects</button></div>`;
+    return;
+  }
+  const ud=getUserData(currentUser);
+  document.getElementById('personalTitle').textContent='Welcome back, '+ud.name.split(' ')[0]+'! 👋';
+
+  // Study subjects list
+  const st=ud.studyTime||{};
+  const total=Object.values(st).reduce((a,b)=>a+b,0)||1;
+  const sorted=Object.entries(st).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  document.getElementById('studySubjList').innerHTML=sorted.length?sorted.map(([name,mins])=>`
+    <div class="ss-item">
+      <div class="ss-name">${name}</div>
+      <div class="ss-bar-wrap"><div class="ss-bar" style="width:${Math.round(mins/total*100)}%"></div></div>
+      <div class="ss-time">${mins>=60?Math.round(mins/60)+'h':mins+'m'}</div>
+    </div>`)
+    .join(''):`<div style="color:var(--text2);font-size:.88rem;">No study time recorded yet. Start studying to see data!</div>`;
+
+  // Activity log
+  const log=(ud.activity||[]).slice(-10).reverse();
+  document.getElementById('activityLog').innerHTML=log.length?log.map(a=>`
+    <div class="al-item">
+      <div class="al-icon">${a.icon}</div>
+      <div class="al-text">${a.text}</div>
+      <div class="al-time">${a.time}</div>
+    </div>`).join(''):`<div style="color:var(--text2);font-size:.88rem;">No activity yet.</div>`;
+
+  // Manage subjects
+  document.getElementById('manageSubjGrid').innerHTML=(ud.subjects||[]).map(s=>`
+    <div class="my-subj-item">
+      ${getIcon(s.id)} ${s.name}<br><small style="color:var(--text2)">${s.curr}</small>
+      <span class="remove-subj" onclick="removeSubject('${s.id}',event)">✕</span>
+    </div>`).join('')||`<div style="color:var(--text2);font-size:.85rem;">No subjects yet.</div>`;
+
+  // Charts
+  const weekDays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const weekData=weekDays.map((_,i)=>{
+    // Simulate some activity based on study time
+    const base=Object.values(st).reduce((a,b)=>a+b,0)/7;
+    return Math.round(base*(0.5+Math.random()));
+  });
+
+  const chartOpts={
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:'rgba(0,229,255,0.08)'},ticks:{color:'rgba(170,200,220,0.7)',font:{family:'DM Sans',size:11}}},
+      y:{grid:{color:'rgba(0,229,255,0.08)'},ticks:{color:'rgba(170,200,220,0.7)',font:{family:'DM Sans',size:11}}}
+    }
+  };
+
+  if(actChart)actChart.destroy();
+  actChart=new Chart(document.getElementById('activityChart'),{
+    type:'bar',
+    data:{
+      labels:weekDays,
+      datasets:[{
+        data:weekData,
+        backgroundColor:'rgba(0,229,255,0.25)',
+        borderColor:'rgba(0,229,255,0.8)',
+        borderWidth:2,borderRadius:6,
+      }]
+    },
+    options:{...chartOpts,plugins:{...chartOpts.plugins}}
+  });
+
+  if(subjChartInst)subjChartInst.destroy();
+  const subjNames=sorted.map(([n])=>n.length>12?n.slice(0,12)+'…':n);
+  const subjMins=sorted.map(([,m])=>m);
+  const colors=['rgba(0,229,255,0.7)','rgba(180,0,255,0.7)','rgba(255,107,53,0.7)','rgba(0,255,136,0.7)','rgba(255,200,0,0.7)','rgba(255,100,200,0.7)'];
+  subjChartInst=new Chart(document.getElementById('subjChart'),{
+    type:'doughnut',
+    data:{
+      labels:subjNames.length?subjNames:['No data'],
+      datasets:[{
+        data:subjMins.length?subjMins:[1],
+        backgroundColor:colors.slice(0,Math.max(subjMins.length,1)),
+        borderColor:'rgba(0,0,0,.3)',borderWidth:2,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'rgba(170,200,220,.8)',font:{family:'DM Sans',size:11}}}}}
+  });
+}
+
+// ══════════════════════════════════
+// ADD SUBJECTS MODAL
+// ══════════════════════════════════
+let selectedInModal=[];
+function openAddSubjModal(){
+  if(!currentUser){showAuthOverlay();return;}
+  const ud=getUserData(currentUser);
+  selectedInModal=[...(ud.subjects||[]).map(s=>s.id)];
+  const body=document.getElementById('modalBody');
+  body.innerHTML=Object.entries(CURRICULA).map(([key,curr])=>`
+    <div class="modal-curr-section">
+      <div class="modal-curr-title">${curr.label}</div>
+      <div class="modal-subj-grid">
+        ${curr.subjects.map(s=>{
+          if(s.levels){
+            return s.levels.map(lv=>{
+              const sid=s.id+'-'+lv.toLowerCase();
+              return `<div class="modal-subj-btn${selectedInModal.includes(sid)?' selected':''}" data-id="${sid}" data-curr="${curr.label}" data-name="${s.name} ${lv}" onclick="toggleModalSubj('${sid}','${curr.label}','${s.name} ${lv}',this)">${s.name} ${lv}</div>`;
+            }).join('');
+          }
+          return `<div class="modal-subj-btn${selectedInModal.includes(s.id)?' selected':''}" data-id="${s.id}" data-curr="${curr.label}" data-name="${s.name}" onclick="toggleModalSubj('${s.id}','${curr.label}','${s.name}',this)">${s.name}</div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+  document.getElementById('addSubjModal').classList.add('open');
+}
+function closeAddSubjModal(){document.getElementById('addSubjModal').classList.remove('open');}
+function toggleModalSubj(id,curr,name,el){
+  el.classList.toggle('selected');
+  if(selectedInModal.includes(id)){selectedInModal=selectedInModal.filter(x=>x!==id);}
+  else{selectedInModal.push(id);}
+}
+function saveSelectedSubjects(){
+  const ud=getUserData(currentUser);
+  // Build full subject objects
+  const subjMap={};
+  Object.entries(CURRICULA).forEach(([,curr])=>{
+    curr.subjects.forEach(s=>{
+      if(s.levels){s.levels.forEach(lv=>{const sid=s.id+'-'+lv.toLowerCase();subjMap[sid]={id:sid,name:s.name+' '+lv,curr:curr.label};});}
+      else{subjMap[s.id]={id:s.id,name:s.name,curr:curr.label};}
+    });
+  });
+  ud.subjects=selectedInModal.map(id=>subjMap[id]).filter(Boolean);
+  saveUserData(currentUser,ud);
+  closeAddSubjModal();
+  renderHomePage();
+  renderPersonalPage();
+  showToast('✅ Subjects updated!','success');
+}
+function removeSubject(id,e){
+  e.stopPropagation();
+  const ud=getUserData(currentUser);
+  ud.subjects=(ud.subjects||[]).filter(s=>s.id!==id);
+  saveUserData(currentUser,ud);
+  renderPersonalPage();
+  renderHomePage();
+  showToast('Removed subject','');
+}
+
+// ══════════════════════════════════
+// ACTIVITY TRACKING
+// ══════════════════════════════════
+function logActivity(icon,text){
+  if(!currentUser)return;
+  const ud=getUserData(currentUser);
+  ud.activity=ud.activity||[];
+  ud.activity.push({icon,text,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  if(ud.activity.length>50)ud.activity=ud.activity.slice(-50);
+  saveUserData(currentUser,ud);
+}
+function trackDoc(title,subj){
+  if(!currentUser)return;
+  const ud=getUserData(currentUser);
+  ud.docsViewed=(ud.docsViewed||0)+1;
+  saveUserData(currentUser,ud);
+  logActivity('📄',`Opened: ${title}`);
+  renderHomePage();
+}
+
+// ══════════════════════════════════
+// FAQ
+// ══════════════════════════════════
+function renderFAQ(){
+  const faqs=[
+    {q:'Is Raah-e-Ilm free to use?',a:'Yes, completely free! All resources link to publicly available free materials.'},
+    {q:'How is my study time tracked?',a:'Study time is recorded per minute while you have a subject page open. Data is saved locally in your browser.'},
+    {q:'Can I use this on mobile?',a:'Yes! The site is fully responsive. Use the ☰ menu to access the sidebar on mobile.'},
+    {q:'Where is my data stored?',a:'All data is stored in your browser\'s local storage — no data is sent to any server.'},
+    {q:'How do I add subjects to my dashboard?',a:'Click "Add Subjects" on the Home page or Dashboard to select subjects from any curriculum.'},
+    {q:'What curricula are supported?',a:'IGCSE, O Levels, AS Levels, and A Levels.'},
+  ];
+  document.getElementById('faqContainer').innerHTML=faqs.map(f=>`
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        ${f.q}<span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">${f.a}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  const item=document.createElement('div');
+  item.className=`toast-item${type?' '+type:''}`;
+  item.textContent=msg;
+  t.appendChild(item);
+  setTimeout(()=>{item.style.opacity='0';item.style.transform='translateX(30px)';item.style.transition='.3s';setTimeout(()=>item.remove(),350);},3000);
+}
+
+// ══════════════════════════════════
+// ENTER KEY SUPPORT
+// ══════════════════════════════════
+// Close sidebar on outside click
+document.addEventListener('click',e=>{
+  if(window.innerWidth<=900&&sidebarOpen){
+    const sb=document.getElementById('sidebar');
+    if(!sb.contains(e.target)&&!e.target.classList.contains('menu-btn')){
+      sidebarOpen=false;sb.classList.remove('open');
+    }
+  }
+});
+
+// ══════════════════════════════════
+// PAGE INIT (Guest mode on load)
+// ══════════════════════════════════
+(function initPage(){
+  document.body.className='guest';
+  buildSidebar();
+  renderHomePage();
+  renderNotesPage();
+  renderPPPage();
+  renderFCDecks();
+  renderPersonalPage();
+  renderFAQ();
+  showPage('home');
+})();
+</script>
+</body>
+</html>
